@@ -23,8 +23,7 @@
     },
     "scheme": "freedompath",
     "plugins": [
-      "expo-router",
-      "expo-status-bar"
+      "expo-router"
     ]
   }
 }

@@ -1,8 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { FinancialMetric } from '@/components/FinancialMetric';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
+import { Screen } from '@/components/Screen';
 import { colors, spacing, typography } from '@/constants/theme';
 import { formatCompactVND, formatPercent } from '@/services/format';
 
@@ -22,11 +23,7 @@ export function DashboardScreen() {
   const remaining = Math.max(0, fiNumber - netWorth);
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <Screen>
       <Card>
         <Text style={styles.label}>FINANCIAL FREEDOM</Text>
         <Text style={styles.progressValue}>{formatPercent(fiProgress)}</Text>
@@ -75,20 +72,11 @@ export function DashboardScreen() {
           />
         </Card>
       </View>
-    </ScrollView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-    gap: spacing.md,
-  },
   label: {
     ...typography.label,
     color: colors.textSecondary,
