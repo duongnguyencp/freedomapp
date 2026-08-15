@@ -12,7 +12,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 | 1     | Project scaffold, navigation, mock UI  | ✅ |
 | 2     | financial-engine + unit tests          | ✅ |
 | 3     | Onboarding, assets, liabilities (CRUD) | ✅ |
-| 4     | Dashboard nối dữ liệu thật             | ⬜ |
+| 4     | Dashboard nối dữ liệu thật             | ✅ |
 | 5     | Snapshots + charts (net worth, FI)     | ⬜ |
 | 6     | What-if calculator                     | ⬜ |
 | 7     | Polish UI + motion design              | ⬜ |
@@ -214,14 +214,47 @@ onboarding thay vì dashboard.
 
 ## Phase 4 — Dashboard nối dữ liệu thật
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Dashboard tính từ `financial-engine` + dữ liệu thật trong store/repository,
 không còn mock.
 
-### Cách verify / demo (khi xong)
-- Đổi 1 asset trong màn Assets → quay lại Home thấy FI % / net worth cập nhật đúng công thức.
+### Đã implement
+- `features/dashboard/useDashboardData.ts` — hook duy nhất chạm vào engine cho Home:
+  load profile + assets + liabilities (nếu chưa load), rồi tính `totalAssets`,
+  `totalLiabilities`, `netWorth`, `fiNumber` (annual spending / SWR), `fiProgress`,
+  `savingsRate`, `monthlyInvestment` (= income − spending), và `projectedFIDate`
+  (`calculateProjectedFIDate` với `fromDate = new Date()` thật).
+- `DashboardScreen` xoá hoàn toàn `mockData.ts`, hiện loading spinner trong lúc 3 store
+  chưa `ready`, hiển thị đúng câu **"FI date cannot be estimated with current assumptions."**
+  khi `projectedFIDate` là `null` (không đạt FI trong 100 năm).
+- Bỏ dòng "+X this month" ở Net Worth card — **không fake số liệu**: chưa có snapshot
+  lịch sử (Phase 5) nên chưa có gì để so sánh "tháng này" một cách trung thực.
+
+### Files chính
+```
+apps/mobile/features/dashboard/useDashboardData.ts
+apps/mobile/features/dashboard/DashboardScreen.tsx     (viết lại, bỏ mockData.ts)
+```
+
+### Cách chạy
+```bash
+pnpm mobile
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công, không lỗi.
+- Demo thật: vào tab Assets, thêm/sửa một khoản (vd Bank +50,000,000) → quay lại Home →
+  FI %, Net Worth, "You need X more" cập nhật đúng công thức ngay lập tức (không cần
+  reload app, vì Zustand store dùng chung giữa 2 màn).
+- Test edge case thật: tạo profile với thu nhập = chi tiêu (savings rate 0%, monthly
+  investment 0) → Home hiện đúng "FI date cannot be estimated with current assumptions."
+  thay vì crash hay hiện NaN/Infinity.
+
+### Việc còn lại (chuyển sang Phase 5+)
+- Chưa có snapshot lịch sử → chưa có "+X this month" ở Net Worth, chưa có chart nào.
+- "Your progress" (line chart) trên Home vẫn chưa tồn tại — đúng phạm vi Phase 5.
 
 ---
 
