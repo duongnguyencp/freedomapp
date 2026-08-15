@@ -10,7 +10,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 | Phase | Nội dung                              | Trạng thái |
 |-------|----------------------------------------|:----------:|
 | 1     | Project scaffold, navigation, mock UI  | ✅ |
-| 2     | financial-engine + unit tests          | ⬜ |
+| 2     | financial-engine + unit tests          | ✅ |
 | 3     | Onboarding, assets, liabilities (CRUD) | ⬜ |
 | 4     | Dashboard nối dữ liệu thật             | ⬜ |
 | 5     | Snapshots + charts (net worth, FI)     | ⬜ |
@@ -87,24 +87,53 @@ pnpm mobile:android     # hoặc mở thẳng Android emulator/thiết bị
 
 ## Phase 2 — financial-engine + unit tests
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Package `packages/financial-engine` — pure TypeScript, không phụ thuộc
 React/React Native/Expo/Zustand/AWS.
 
-### Cần implement
-`calculateTotalAssets`, `calculateTotalLiabilities`, `calculateNetWorth`,
-`calculateFINumber`, `calculateSavingsRate`, `calculateFIProgress`,
-`calculateFutureValue`, `calculateProjectedFIDate`, `calculateYearsToFI`,
-`calculateWhatIf`.
+### Đã implement
+- 10 hàm tính toán theo đúng spec: `calculateTotalAssets`, `calculateTotalLiabilities`,
+  `calculateNetWorth`, `calculateFINumber`, `calculateSavingsRate`, `calculateFIProgress`,
+  `calculateFutureValue`, `calculateYearsToFI`, `calculateProjectedFIDate`, `calculateWhatIf`.
+- Domain types dùng chung (`UserProfile`, `Asset`, `Liability`, `FinancialSnapshot`) —
+  đặt trong engine vì không phụ thuộc framework, Phase 3 sẽ tái sử dụng cho repositories.
+- Projection (`calculateFutureValue`/`calculateYearsToFI`/`calculateProjectedFIDate`) dùng
+  **mô phỏng compound theo tháng, xác định (deterministic)** — không dùng AI, có ghi rõ
+  giả định (monthly compounding, không tính lạm phát/thuế) ngay trong code comment.
+  Trả về `null` khi không đạt FI trong `maxYears` (mặc định 100 năm) → tầng UI hiển thị
+  "FI date cannot be estimated with current assumptions."
+- FI Progress cap ở 100%, Savings Rate không cap (có thể âm nếu chi > thu).
+- 33 unit test (`vitest`), gồm cả các ví dụ đối chiếu số liệu trong prompt.md và edge case
+  (chia cho 0, SWR âm/0, không đạt FI trong horizon, net worth âm...).
 
-### Cách verify / demo (khi xong)
+### Files chính
+```
+packages/financial-engine/src/{types,totals,fiNumber,savingsRate,fiProgress,projection,whatIf,index}.ts
+packages/financial-engine/tests/*.test.ts
+packages/financial-engine/package.json      (build/test scripts)
+```
+
+### Cách chạy
+```bash
+pnpm --filter financial-engine build   # biên dịch ra dist/ (dùng cho Phase 3/4)
+```
+
+### Cách verify / demo
 ```bash
 pnpm --filter financial-engine test
 ```
-- Test case tối thiểu: total assets, total liabilities, net worth, FI number,
-  savings rate, FI progress, future value, projected FI date, what-if, edge cases.
+Kết quả: **6 test file, 33/33 test pass**. Bao gồm đúng 2 ví dụ trong prompt.md:
+- Annual spending 240M, SWR 4% → FI number = 6B ✓
+- Net worth 1.5B, FI number 6B → FI progress = 25% ✓
+
+`pnpm --filter financial-engine build` chạy sạch, không lỗi type — CI job
+`test-financial-engine` giờ chạy test thật thay vì skip.
+
+### Việc còn lại (chuyển sang Phase 3+)
+- Chưa có UI nào gọi tới engine này — Home vẫn dùng mock data (Phase 4 mới nối thật).
+- Chưa có repository/store để lấy input thật (assets/liabilities/profile) cho engine.
 - Ví dụ đối chiếu số liệu trong prompt.md:
   - Annual spending 240M, SWR 4% → FI number = 6B.
   - Net worth 1.5B / FI number 6B → FI progress = 25%.

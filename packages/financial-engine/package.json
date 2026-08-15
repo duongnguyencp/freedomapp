@@ -1,0 +1,17 @@
+{
+  "name": "financial-engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Pure TypeScript financial calculations for FreedomPath. No React, React Native, Expo, Zustand or AWS dependencies.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.7"
+  }
+}
