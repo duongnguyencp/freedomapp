@@ -2,6 +2,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { FinancialMetric } from '@/components/FinancialMetric';
+import { MiniLineChart } from '@/components/MiniLineChart';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { Screen } from '@/components/Screen';
 import { colors, spacing, typography } from '@/constants/theme';
@@ -20,8 +21,16 @@ export function DashboardScreen() {
     );
   }
 
-  const { netWorth, fiNumber, fiProgress, remaining, savingsRate, monthlyInvestment, projectedFIDate } =
-    data;
+  const {
+    netWorth,
+    fiNumber,
+    fiProgress,
+    remaining,
+    savingsRate,
+    monthlyInvestment,
+    projectedFIDate,
+    netWorthHistory,
+  } = data;
 
   return (
     <Screen>
@@ -78,6 +87,18 @@ export function DashboardScreen() {
           />
         </Card>
       </View>
+
+      {netWorthHistory.length >= 2 ? (
+        <Card>
+          <Text style={styles.progressTitle}>Your progress</Text>
+          <MiniLineChart
+            labels={netWorthHistory.map((point) => point.label)}
+            values={netWorthHistory.map((point) => point.value)}
+            formatValue={formatCompactVND}
+            height={140}
+          />
+        </Card>
+      ) : null}
     </Screen>
   );
 }
@@ -143,5 +164,11 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
+  },
+  progressTitle: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
 });

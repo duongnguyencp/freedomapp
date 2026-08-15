@@ -13,7 +13,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 | 2     | financial-engine + unit tests          | ✅ |
 | 3     | Onboarding, assets, liabilities (CRUD) | ✅ |
 | 4     | Dashboard nối dữ liệu thật             | ✅ |
-| 5     | Snapshots + charts (net worth, FI)     | ⬜ |
+| 5     | Snapshots + charts (net worth, FI)     | ✅ |
 | 6     | What-if calculator                     | ⬜ |
 | 7     | Polish UI + motion design              | ⬜ |
 
@@ -260,14 +260,59 @@ pnpm mobile
 
 ## Phase 5 — Snapshots + Charts
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Ghi snapshot tài chính; line chart Net Worth History; line chart FI Progress;
 donut chart Asset Allocation.
 
-### Cách verify / demo (khi xong)
-- Tạo ≥3 snapshot ở các thời điểm khác nhau → History hiển thị đúng 2 chart tăng dần.
+### Đã implement
+- **Chart library:** `react-native-chart-kit` + `react-native-svg` (nhẹ, thuần SVG, không cần
+  Skia — đúng yêu cầu "lightweight"; Skia để dành cho animation ở Phase 7).
+- **Snapshot:** `repositories/snapshotRepository.ts` (AsyncStorage, upsert theo `date` để ghi
+  2 lần cùng ngày không tạo điểm trùng trên chart) + `stores/snapshotsStore.ts`.
+- **Refactor:** tách `hooks/useFinancialSummary.ts` — 1 nguồn tính `totalAssets/
+  totalLiabilities/netWorth/fiNumber/fiProgress` dùng chung giữa Dashboard và History (trước
+  đây logic này nằm rải rác, giờ không lặp code).
+- **History screen:** nút "Record snapshot" (ghi snapshot từ số liệu thật hiện tại) + 2 line
+  chart (Net Worth, FI Progress) khi có ≥2 điểm dữ liệu + donut asset allocation (group theo
+  category, tính % trực tiếp từ assets hiện có, không cần snapshot).
+- **Dashboard:** thêm "Your progress" — mini line chart net worth, chỉ hiện khi có ≥2 snapshot
+  (không fake dữ liệu khi chưa đủ).
+- **Màu categorical:** dùng palette đã validate sẵn (8 hue, thứ tự cố định, pass CVD/contrast
+  check cho cặp liền kề) cho asset allocation — không tự chọn màu tuỳ hứng. Legend tự vẽ
+  (swatch + tên + %) vì `react-native-chart-kit` không hỗ trợ % trong legend built-in, và để
+  đảm bảo không nhận diện category chỉ bằng màu.
+
+### Files chính
+```
+apps/mobile/repositories/snapshotRepository.ts
+apps/mobile/stores/snapshotsStore.ts
+apps/mobile/hooks/useFinancialSummary.ts
+apps/mobile/services/date.ts                          todayISODate, monthLabel
+apps/mobile/components/{MiniLineChart,MiniPieChart}.tsx
+apps/mobile/features/assets/categories.ts              + ASSET_CATEGORY_COLORS, buildAssetAllocation
+apps/mobile/features/history/HistoryScreen.tsx          (viết lại)
+apps/mobile/features/dashboard/{DashboardScreen,useDashboardData}.tsx
+```
+
+### Cách chạy
+```bash
+pnpm mobile
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công (không lỗi
+  react-native-svg/chart-kit).
+- `pnpm --filter financial-engine test` vẫn 33/33 pass.
+- Demo thật: vào tab History, bấm "Record snapshot" hôm nay → thấy "Todays net worth" khớp
+  Home. Record thêm ở 1 ngày khác (đổi ngày máy hoặc sửa liệu để test) → 2 line chart (Net
+  Worth, FI Progress) xuất hiện. Vào Assets thêm ≥2 loại tài sản khác category → quay lại
+  History thấy donut chart + legend % chia đúng theo category.
+
+### Việc còn lại (chuyển sang Phase 6+)
+- Chưa có What-if calculator (Phase 6).
+- Chưa có animation/motion (progress ring animate, số đếm lên...) — Phase 7.
 
 ---
 

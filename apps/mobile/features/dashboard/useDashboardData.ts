@@ -1,18 +1,9 @@
 import { useEffect, useMemo } from 'react';
-import {
-  calculateFINumber,
-  calculateFIProgress,
-  calculateNetWorth,
-  calculateProjectedFIDate,
-  calculateSavingsRate,
-  calculateTotalAssets,
-  calculateTotalLiabilities,
-  type ProjectedFIDate,
-} from 'financial-engine';
+import { calculateProjectedFIDate, calculateSavingsRate, type ProjectedFIDate } from 'financial-engine';
 
-import { useAssetsStore } from '@/stores/assetsStore';
-import { useLiabilitiesStore } from '@/stores/liabilitiesStore';
-import { useProfileStore } from '@/stores/profileStore';
+import { useFinancialSummary } from '@/hooks/useFinancialSummary';
+import { monthLabel } from '@/services/date';
+import { useSnapshotsStore } from '@/stores/snapshotsStore';
 
 export interface DashboardData {
   netWorth: number;
@@ -22,46 +13,35 @@ export interface DashboardData {
   savingsRate: number;
   monthlyInvestment: number;
   projectedFIDate: ProjectedFIDate | null;
+  netWorthHistory: { label: string; value: number }[];
 }
 
 /**
- * Combines profile + assets + liabilities with financial-engine to derive
- * everything the dashboard shows. No calculation lives in the screen —
- * this hook is the only place that touches the engine for Home.
+ * Everything the Home dashboard shows. financial-engine math lives in
+ * useFinancialSummary (shared with History); this hook only adds the
+ * projection and shapes the snapshot history for the chart.
  */
 export function useDashboardData(): { status: 'loading' | 'ready'; data: DashboardData | null } {
-  const profileStatus = useProfileStore((state) => state.status);
-  const profile = useProfileStore((state) => state.profile);
-  const loadProfile = useProfileStore((state) => state.load);
+  const { status: summaryStatus, summary, profile } = useFinancialSummary();
 
-  const assetsStatus = useAssetsStore((state) => state.status);
-  const assets = useAssetsStore((state) => state.assets);
-  const loadAssets = useAssetsStore((state) => state.load);
-
-  const liabilitiesStatus = useLiabilitiesStore((state) => state.status);
-  const liabilities = useLiabilitiesStore((state) => state.liabilities);
-  const loadLiabilities = useLiabilitiesStore((state) => state.load);
+  const snapshotsStatus = useSnapshotsStore((state) => state.status);
+  const snapshots = useSnapshotsStore((state) => state.snapshots);
+  const loadSnapshots = useSnapshotsStore((state) => state.load);
 
   useEffect(() => {
-    if (profileStatus === 'idle') loadProfile();
-    if (assetsStatus === 'idle') loadAssets();
-    if (liabilitiesStatus === 'idle') loadLiabilities();
-  }, [profileStatus, assetsStatus, liabilitiesStatus, loadProfile, loadAssets, loadLiabilities]);
+    if (snapshotsStatus === 'idle') {
+      loadSnapshots();
+    }
+  }, [snapshotsStatus, loadSnapshots]);
 
-  const allReady = profileStatus === 'ready' && assetsStatus === 'ready' && liabilitiesStatus === 'ready';
+  const allReady = summaryStatus === 'ready' && snapshotsStatus === 'ready';
 
   const data = useMemo<DashboardData | null>(() => {
-    if (!allReady || !profile) {
+    if (!allReady || !summary || !profile) {
       return null;
     }
 
-    const totalAssets = calculateTotalAssets(assets);
-    const totalLiabilities = calculateTotalLiabilities(liabilities);
-    const netWorth = calculateNetWorth(totalAssets, totalLiabilities);
-
-    const annualSpending = profile.monthlySpending * 12;
-    const fiNumber = calculateFINumber(annualSpending, profile.safeWithdrawalRate);
-    const fiProgress = calculateFIProgress(netWorth, fiNumber);
+    const { netWorth, fiNumber, fiProgress } = summary;
     const remaining = Math.max(0, fiNumber - netWorth);
 
     const savingsRate = calculateSavingsRate(profile.monthlyIncome, profile.monthlySpending);
@@ -77,8 +57,22 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       new Date(),
     );
 
-    return { netWorth, fiNumber, fiProgress, remaining, savingsRate, monthlyInvestment, projectedFIDate };
-  }, [allReady, profile, assets, liabilities]);
+    const netWorthHistory = snapshots.map((snapshot) => ({
+      label: monthLabel(snapshot.date),
+      value: snapshot.netWorth,
+    }));
+
+    return {
+      netWorth,
+      fiNumber,
+      fiProgress,
+      remaining,
+      savingsRate,
+      monthlyInvestment,
+      projectedFIDate,
+      netWorthHistory,
+    };
+  }, [allReady, summary, profile, snapshots]);
 
   return { status: allReady ? 'ready' : 'loading', data };
 }
