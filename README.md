@@ -6,7 +6,7 @@ with React Native + Expo.
 > "Help users understand how close they are to financial independence."
 
 ## Status
-
+a
 **Phase 1 — Project scaffold, navigation, mock dashboard.** See
 [prompt.md](./prompt.md) for the full product spec and phase plan, and
 [DEVELOPMENT_LOG.md](./DEVELOPMENT_LOG.md) for per-phase progress,
