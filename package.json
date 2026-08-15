@@ -1,0 +1,10 @@
+{
+  "name": "freedom-path",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "mobile:android": "pnpm --filter mobile android"
+  },
+  "packageManager": "pnpm@9.15.9"
+}

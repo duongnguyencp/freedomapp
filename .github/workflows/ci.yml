@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: "9"
+  NODE_VERSION: "20"
+
+jobs:
+  typecheck-mobile:
+    name: Typecheck (apps/mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter mobile exec tsc --noEmit
+
+  build-check-mobile:
+    name: Bundle check (apps/mobile, Android)
+    runs-on: ubuntu-latest
+    needs: typecheck-mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Export Android bundle (fails on module/runtime errors)
+        working-directory: apps/mobile
+        run: pnpm exec expo export --platform android --output-dir /tmp/expo-export
+
+  test-financial-engine:
+    name: Test (packages/financial-engine)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Check financial-engine exists
+        id: check
+        run: |
+          if [ -f "packages/financial-engine/package.json" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.check.outputs.exists == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        if: steps.check.outputs.exists == 'true'
+        run: pnpm --filter financial-engine test
+
+      - name: Skip (financial-engine not created yet — Phase 2)
+        if: steps.check.outputs.exists == 'false'
+        run: echo "packages/financial-engine does not exist yet, skipping."

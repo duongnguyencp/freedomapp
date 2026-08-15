@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.orig.*
+expo-env.d.ts
+
+# native
+.kotlin/
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# metro / build
+.metro-health-check*
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.*
+
+# test coverage
+coverage/
+
+# editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
