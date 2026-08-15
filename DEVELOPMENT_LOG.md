@@ -19,6 +19,24 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 
 ---
 
+## Infra
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+- Git repo riêng cho `freedomapp/` (trước đó repo bị lẫn ở thư mục home), branch mặc định `main`.
+- `.gitignore` đầy đủ cho monorepo pnpm/Expo: `node_modules`, `.expo/`, native folders,
+  `.env*`, coverage, editor/OS files.
+- CI (`.github/workflows/ci.yml`, chạy trên push/PR vào `main`):
+  - **typecheck-mobile** — `tsc --noEmit` cho `apps/mobile`.
+  - **build-check-mobile** — `expo export --platform android`, fail nếu có lỗi
+    module/runtime khi bundle (tương đương smoke test).
+  - **test-financial-engine** — chạy `pnpm --filter financial-engine test`; tự động
+    bỏ qua (không fail) cho tới khi package đó được tạo ở Phase 2.
+- Cách verify: push lên GitHub, xem tab Actions → cả 3 job phải xanh (job thứ 3 sẽ
+  hiện "skip" cho tới Phase 2).
+
+---
+
 ## Phase 1 — Project scaffold, navigation, mock UI
 
 **Trạng thái:** ✅ Done — 2026-08-15
