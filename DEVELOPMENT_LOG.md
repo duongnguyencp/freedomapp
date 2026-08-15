@@ -11,7 +11,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 |-------|----------------------------------------|:----------:|
 | 1     | Project scaffold, navigation, mock UI  | ✅ |
 | 2     | financial-engine + unit tests          | ✅ |
-| 3     | Onboarding, assets, liabilities (CRUD) | ⬜ |
+| 3     | Onboarding, assets, liabilities (CRUD) | ✅ |
 | 4     | Dashboard nối dữ liệu thật             | ⬜ |
 | 5     | Snapshots + charts (net worth, FI)     | ⬜ |
 | 6     | What-if calculator                     | ⬜ |
@@ -142,16 +142,73 @@ Kết quả: **6 test file, 33/33 test pass**. Bao gồm đúng 2 ví dụ trong
 
 ## Phase 3 — Onboarding, Assets, Liabilities
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Nhập được hồ sơ tài chính; thêm/sửa/xóa asset và liability; lưu offline
 (SQLite/AsyncStorage) qua `repositories/`.
 
-### Cách verify / demo (khi xong)
-- Onboarding: nhập age, income, spending, assets, liabilities, expected return,
-  SWR → lưu và load lại được sau khi tắt/mở app (test tính bền dữ liệu).
-- Assets/Liabilities: thêm 1 asset, sửa giá trị, xóa — list cập nhật đúng ngay lập tức.
+### Đã implement
+- **Storage:** `@react-native-async-storage/async-storage`. 3 repository (`profileRepository`,
+  `assetRepository`, `liabilityRepository`) — UI/store không bao giờ đụng AsyncStorage trực tiếp.
+- **State:** Zustand (`stores/profileStore`, `stores/assetsStore`, `stores/liabilitiesStore`) —
+  mỗi store bọc repository tương ứng, giữ state in-memory để UI reactive.
+- **Routing gate:** `app/index.tsx` kiểm tra đã có `UserProfile` chưa → `<Redirect>` sang
+  `/onboarding` (chưa có) hoặc `/(tabs)` (đã có). Tab navigation cũ chuyển vào group
+  `app/(tabs)/`.
+- **Onboarding** (`features/onboarding`): 1 màn hình, đúng 7 câu hỏi trong spec (age, income,
+  spending, current assets, current liabilities, expected return, SWR), 2 default sẵn
+  (SWR 4%, return 7%). Lưu profile + seed 1 asset/liability "Starting..." nếu người dùng nhập
+  số dư ban đầu > 0, rồi chuyển sang tabs.
+- **Assets & Liabilities** (`features/assets`): CRUD đầy đủ (add/edit/delete) cho cả hai, dùng
+  chung 1 form component (`EntryForm`) + category chips. Card tổng hợp Total Assets/
+  Total Liabilities/Net Worth — **lần đầu gọi trực tiếp `financial-engine`** trong app.
+- **Settings** (`features/settings`): xem & sửa lại giả định tài chính (age/income/spending/
+  expected return/SWR) sau onboarding.
+- **Monorepo wiring:** `apps/mobile` giờ phụ thuộc `financial-engine` qua
+  `"financial-engine": "workspace:*"`; `financial-engine/package.json` trỏ `main`/`types`
+  thẳng vào `src/index.ts` (không cần build step) để Metro bundle trực tiếp từ TypeScript
+  source; thêm `apps/mobile/metro.config.js` để Metro watch được ra ngoài `apps/mobile`
+  vào `packages/financial-engine` (theo đúng pnpm monorepo — **không** bật
+  `resolver.disableHierarchicalLookup`, vì nó phá resolution của pnpm's nested
+  node_modules).
+
+### Files chính
+```
+apps/mobile/app/index.tsx                   gate: onboarding vs (tabs)
+apps/mobile/app/onboarding.tsx
+apps/mobile/app/(tabs)/*                     (di chuyển từ app/*)
+apps/mobile/metro.config.js
+apps/mobile/repositories/{profile,asset,liability}Repository.ts
+apps/mobile/stores/{profile,assets,liabilities}Store.ts
+apps/mobile/features/onboarding/OnboardingScreen.tsx
+apps/mobile/features/assets/{AssetsScreen,EntryForm,EntryListItem,CategoryChips,categories}.tsx
+apps/mobile/features/settings/SettingsScreen.tsx
+apps/mobile/components/{FormField,Button}.tsx
+```
+
+### Cách chạy
+```bash
+pnpm install
+pnpm mobile
+```
+Xoá app trong Expo Go (hoặc "Clear data") để test lại từ đầu (không có profile) → thấy
+onboarding thay vì dashboard.
+
+### Cách verify / demo
+- `tsc --noEmit` sạch (`apps/mobile`).
+- `expo export --platform android` bundle **1089 module**, không lỗi — xác nhận Metro
+  resolve đúng package `financial-engine` qua workspace.
+- `pnpm --filter financial-engine test` vẫn 33/33 pass (không có regression).
+- Demo thật trên điện thoại: mở app lần đầu → onboarding → nhập số → Continue → vào
+  thẳng Home. Vào tab Assets → thêm 1 asset (vd Bank 170,000,000) → thấy ngay trong list
+  và trong card tổng hợp Net Worth. Sửa/xoá asset đó → list cập nhật ngay. Tắt hẳn app,
+  mở lại → dữ liệu vẫn còn (AsyncStorage), không quay lại onboarding.
+
+### Việc còn lại (chuyển sang Phase 4+)
+- Home dashboard **vẫn dùng mock data** — chưa đọc từ profile/assets/liabilities thật.
+  Đó chính xác là việc của Phase 4.
+- Chưa có snapshot lịch sử (Phase 5).
 
 ---
 
