@@ -45,40 +45,62 @@ export function DashboardScreen() {
         <Card tinted>
           <Text style={styles.label}>TỰ DO TÀI CHÍNH</Text>
 
-          <View style={styles.ringWrap}>
-            <ProgressRing progress={fiProgress} size={176} strokeWidth={14}>
-              <AnimatedNumber
-                value={fiProgress}
-                formatValue={(value) => formatPercent(value)}
-                style={styles.ringValue}
-              />
-            </ProgressRing>
-          </View>
-
-          <Text style={styles.rangeText}>
-            {formatCompactVND(netWorth)} / {formatCompactVND(fiNumber)}
-          </Text>
-
-          <View style={styles.divider} />
-
-          <View style={styles.rowBetween}>
-            <View>
-              <Text style={styles.caption}>Bạn cần thêm</Text>
-              <Text style={[styles.remaining, remaining > 0 && styles.remainingWarm]}>
-                {remaining > 0 ? `${formatCompactVND(remaining)} nữa` : 'Bạn đã đạt được rồi 🎉'}
+          {fiNumber <= 0 ? (
+            <View style={styles.noGoalWrap}>
+              <Text style={styles.noGoalText}>
+                Chưa tính được mục tiêu FI vì "Chi tiêu hàng tháng" đang là 0. Số tiền mục
+                tiêu luôn được tính tự động từ Chi tiêu hàng tháng và Tỷ lệ rút an toàn.
               </Text>
+              <Link href="/(tabs)/settings" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <Text style={[styles.noGoalLink, pressed && styles.whatIfCardPressed]}>
+                      Vào Cài đặt để cập nhật →
+                    </Text>
+                  )}
+                </Pressable>
+              </Link>
             </View>
-            <View style={styles.alignEnd}>
-              <Text style={styles.caption}>Dự kiến đạt FI</Text>
-              <Text style={styles.remaining}>{projectedFIDate ? projectedFIDate.year : '—'}</Text>
-            </View>
-          </View>
+          ) : (
+            <>
+              <View style={styles.ringWrap}>
+                <ProgressRing progress={fiProgress} size={176} strokeWidth={14}>
+                  <AnimatedNumber
+                    value={fiProgress}
+                    formatValue={(value) => formatPercent(value)}
+                    style={styles.ringValue}
+                  />
+                </ProgressRing>
+              </View>
 
-          {!projectedFIDate ? (
-            <Text style={styles.warning}>
-              Không thể ước tính ngày đạt FI với giả định hiện tại.
-            </Text>
-          ) : null}
+              <Text style={styles.rangeText}>
+                {formatCompactVND(netWorth)} / {formatCompactVND(fiNumber)}
+              </Text>
+
+              <View style={styles.divider} />
+
+              <View style={styles.rowBetween}>
+                <View>
+                  <Text style={styles.caption}>Bạn cần thêm</Text>
+                  <Text style={[styles.remaining, remaining > 0 && styles.remainingWarm]}>
+                    {remaining > 0 ? `${formatCompactVND(remaining)} nữa` : 'Bạn đã đạt được rồi 🎉'}
+                  </Text>
+                </View>
+                <View style={styles.alignEnd}>
+                  <Text style={styles.caption}>Dự kiến đạt FI</Text>
+                  <Text style={styles.remaining}>
+                    {projectedFIDate ? projectedFIDate.year : '—'}
+                  </Text>
+                </View>
+              </View>
+
+              {!projectedFIDate ? (
+                <Text style={styles.warning}>
+                  Không thể ước tính ngày đạt FI với giả định hiện tại.
+                </Text>
+              ) : null}
+            </>
+          )}
         </Card>
       </AnimatedEntrance>
 
@@ -185,6 +207,19 @@ const styles = StyleSheet.create({
   },
   remainingWarm: {
     color: colors.warm,
+  },
+  noGoalWrap: {
+    marginTop: spacing.lg,
+    gap: spacing.md,
+  },
+  noGoalText: {
+    ...typography.body,
+    color: colors.textSecondary,
+  },
+  noGoalLink: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.accent,
   },
   warning: {
     ...typography.caption,
