@@ -1,10 +1,14 @@
+import { useCallback } from 'react';
 import {
   ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
+  type GestureResponderEvent,
   type PressableProps,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { colors, radius, spacing, typography } from '@/constants/theme';
 
@@ -16,28 +20,67 @@ type ButtonProps = Omit<PressableProps, 'style'> & {
   loading?: boolean;
 };
 
-export function Button({ label, variant = 'primary', loading, disabled, ...rest }: ButtonProps) {
+export function Button({
+  label,
+  variant = 'primary',
+  loading,
+  disabled,
+  onPress,
+  onPressIn,
+  onPressOut,
+  ...rest
+}: ButtonProps) {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(
+    (event: GestureResponderEvent) => {
+      scale.value = withTiming(0.97, { duration: 100 });
+      onPressIn?.(event);
+    },
+    [scale, onPressIn],
+  );
+
+  const handlePressOut = useCallback(
+    (event: GestureResponderEvent) => {
+      scale.value = withTiming(1, { duration: 150 });
+      onPressOut?.(event);
+    },
+    [scale, onPressOut],
+  );
+
+  const handlePress = useCallback(
+    (event: GestureResponderEvent) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      onPress?.(event);
+    },
+    [onPress],
+  );
 
   return (
     <Pressable
       accessibilityRole="button"
       disabled={isDisabled}
-      style={({ pressed }) => [
-        styles.base,
-        variantStyles[variant],
-        isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
-      ]}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={handlePress}
       {...rest}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'secondary' ? colors.ink : '#FFFFFF'} />
-      ) : (
-        <Text style={[styles.label, variant === 'secondary' && styles.labelSecondary]}>
-          {label}
-        </Text>
-      )}
+      <Animated.View
+        style={[styles.base, variantStyles[variant], isDisabled && styles.disabled, animatedStyle]}
+      >
+        {loading ? (
+          <ActivityIndicator color={variant === 'secondary' ? colors.ink : '#FFFFFF'} />
+        ) : (
+          <Text style={[styles.label, variant === 'secondary' && styles.labelSecondary]}>
+            {label}
+          </Text>
+        )}
+      </Animated.View>
     </Pressable>
   );
 }
@@ -48,9 +91,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  pressed: {
-    opacity: 0.85,
   },
   disabled: {
     opacity: 0.5,

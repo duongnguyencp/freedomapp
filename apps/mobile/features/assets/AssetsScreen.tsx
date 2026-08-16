@@ -8,6 +8,7 @@ import {
   type LiabilityCategory,
 } from 'financial-engine';
 
+import { AnimatedEntrance } from '@/components/AnimatedEntrance';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
@@ -80,13 +81,15 @@ export function AssetsScreen() {
     <Screen>
       <SectionHeader title="Assets & Liabilities" />
 
-      <Card style={styles.summaryCard}>
-        <View style={styles.summaryRow}>
-          <SummaryItem label="Assets" value={formatCompactVND(totalAssets)} />
-          <SummaryItem label="Liabilities" value={formatCompactVND(totalLiabilities)} />
-          <SummaryItem label="Net worth" value={formatCompactVND(netWorth)} emphasize />
-        </View>
-      </Card>
+      <AnimatedEntrance index={0}>
+        <Card style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <SummaryItem label="Assets" value={formatCompactVND(totalAssets)} />
+            <SummaryItem label="Liabilities" value={formatCompactVND(totalLiabilities)} />
+            <SummaryItem label="Net worth" value={formatCompactVND(netWorth)} emphasize />
+          </View>
+        </Card>
+      </AnimatedEntrance>
 
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>

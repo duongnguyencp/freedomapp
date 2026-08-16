@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 
+import { AnimatedEntrance } from '@/components/AnimatedEntrance';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { FinancialMetric } from '@/components/FinancialMetric';
@@ -63,53 +64,63 @@ export function HistoryScreen() {
     <Screen>
       <SectionHeader title="History" />
 
-      <Card style={styles.recordCard}>
-        <FinancialMetric label="Today's net worth" value={formatCompactVND(summary.netWorth)} />
-        <Button
-          label={recording ? 'Recording…' : 'Record snapshot'}
-          onPress={handleRecord}
-          loading={recording}
-        />
-      </Card>
+      <AnimatedEntrance index={0}>
+        <Card style={styles.recordCard}>
+          <FinancialMetric label="Today's net worth" value={formatCompactVND(summary.netWorth)} />
+          <Button
+            label={recording ? 'Recording…' : 'Record snapshot'}
+            onPress={handleRecord}
+            loading={recording}
+          />
+        </Card>
+      </AnimatedEntrance>
 
       {snapshots.length === 0 ? (
-        <Card>
-          <Text style={styles.empty}>
-            No snapshots yet. Record one above to start tracking your progress over time.
-          </Text>
-        </Card>
+        <AnimatedEntrance index={1}>
+          <Card>
+            <Text style={styles.empty}>
+              No snapshots yet. Record one above to start tracking your progress over time.
+            </Text>
+          </Card>
+        </AnimatedEntrance>
       ) : (
         <>
-          <Card>
-            <Text style={styles.chartTitle}>Net worth</Text>
-            {hasTrend ? (
-              <MiniLineChart labels={labels} values={netWorthValues} formatValue={formatCompactVND} />
-            ) : (
-              <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
-            )}
-          </Card>
+          <AnimatedEntrance index={1}>
+            <Card>
+              <Text style={styles.chartTitle}>Net worth</Text>
+              {hasTrend ? (
+                <MiniLineChart labels={labels} values={netWorthValues} formatValue={formatCompactVND} />
+              ) : (
+                <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
+              )}
+            </Card>
+          </AnimatedEntrance>
 
-          <Card>
-            <Text style={styles.chartTitle}>Financial Independence Progress</Text>
-            {hasTrend ? (
-              <MiniLineChart
-                labels={labels}
-                values={fiProgressValues}
-                color={colors.success}
-                formatValue={(value) => formatPercent(value, 0)}
-              />
-            ) : (
-              <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
-            )}
-          </Card>
+          <AnimatedEntrance index={2}>
+            <Card>
+              <Text style={styles.chartTitle}>Financial Independence Progress</Text>
+              {hasTrend ? (
+                <MiniLineChart
+                  labels={labels}
+                  values={fiProgressValues}
+                  color={colors.success}
+                  formatValue={(value) => formatPercent(value, 0)}
+                />
+              ) : (
+                <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
+              )}
+            </Card>
+          </AnimatedEntrance>
         </>
       )}
 
       {allocation.length > 0 ? (
-        <Card>
-          <Text style={styles.chartTitle}>Asset allocation</Text>
-          <MiniPieChart slices={allocation} />
-        </Card>
+        <AnimatedEntrance index={3}>
+          <Card>
+            <Text style={styles.chartTitle}>Asset allocation</Text>
+            <MiniPieChart slices={allocation} />
+          </Card>
+        </AnimatedEntrance>
       ) : null}
     </Screen>
   );

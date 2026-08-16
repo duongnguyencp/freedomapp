@@ -15,7 +15,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 | 4     | Dashboard nối dữ liệu thật             | ✅ |
 | 5     | Snapshots + charts (net worth, FI)     | ✅ |
 | 6     | What-if calculator                     | ✅ |
-| 7     | Polish UI + motion design              | ⬜ |
+| 7     | Polish UI + motion design              | ✅ |
 
 ---
 
@@ -415,15 +415,68 @@ pnpm mobile
 
 ## Phase 7 — Polish UI + Motion design
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Reanimated/Skia: progress ring animate 0→giá trị thật, animated numbers,
 chart drawing animation, card entrance stagger, haptic feedback.
 
-### Cách verify / demo (khi xong)
-- Mở app: progress ring và số net worth animate từ 0 lên giá trị thật trong 800–1200ms,
-  card dashboard xuất hiện có stagger nhẹ, không giật/lag.
+### Đã implement
+- `react-native-reanimated` (~4.1.1, kèm `react-native-worklets` ~0.5.1 — Reanimated 4 tách
+  worklets engine ra package riêng, phải ghim đúng range peer `0.5-0.8` chứ không lấy bản
+  "latest" 0.11.4 mà `expo install` gợi ý ban đầu, nếu không app crash lúc chạy dù build
+  qua). Thêm `apps/mobile/babel.config.js` với plugin `react-native-reanimated/plugin`
+  (bắt buộc đứng cuối danh sách plugin).
+- **`ProgressRing`** (`react-native-svg` + Reanimated): vòng tròn animate 0 → % thật trong
+  1000ms, easing out-cubic, và **animate lại mỗi khi giá trị đổi** (không chỉ lúc mount) —
+  dùng `useEffect` theo dõi prop `progress`, khớp đúng yêu cầu "Progress Updates".
+- **`AnimatedNumber`**: đếm số lên bằng kỹ thuật `Animated.createAnimatedComponent(TextInput)`
+  + `useAnimatedProps` set `text` trực tiếp (native prop, không có trong type RN nên phải
+  cast tường minh). Chỉ dùng cho **2 số quan trọng nhất**: FI % (trong ring) và Net Worth —
+  đúng "Do not animate every number on the screen".
+- **`AnimatedEntrance`**: card fade-in (opacity 0→1) + trượt lên (translateY 12→0), stagger
+  70ms/card, dùng Reanimated `entering` (`FadeInUp` custom initial values) — áp cho toàn bộ
+  card Dashboard, và card đầu History/Assets.
+- **Button**: scale nhẹ (0.97) khi nhấn qua Reanimated + haptic `impactAsync` (light) khi
+  bấm — dùng `expo-haptics`.
+- **Giới hạn đã biết (ghi nhận trung thực):** "Chart Drawing Animation" trong prompt.md yêu
+  cầu net-worth chart **vẽ trái sang phải** khi vào viewport. `react-native-chart-kit` không
+  expose path SVG để animate stroke-dashoffset kiểu đó — đã thay bằng entrance animation
+  (fade + trượt nhẹ) cho card chứa chart, không phải animation vẽ đường thật. Nếu cần đúng
+  100% behavior này sau MVP, cần thay chart library (vd tự vẽ bằng `react-native-svg` +
+  Reanimated) hoặc dùng Skia — không làm trong phase này để tránh phá vỡ những gì Phase 5
+  đã ổn định.
+- **Bỏ qua Skia:** SVG + Reanimated đã đủ cho ring animation, không cần thêm dependency nặng
+  hơn — quyết định phạm vi có chủ đích, không phải bỏ sót.
+
+### Files chính
+```
+apps/mobile/babel.config.js
+apps/mobile/components/{ProgressRing,AnimatedNumber,AnimatedEntrance}.tsx
+apps/mobile/components/Button.tsx                      (scale + haptic)
+apps/mobile/features/dashboard/DashboardScreen.tsx      (ring, animated numbers, stagger)
+apps/mobile/features/history/HistoryScreen.tsx          (+ stagger)
+apps/mobile/features/assets/AssetsScreen.tsx            (+ stagger card đầu)
+```
+
+### Cách chạy
+```bash
+pnpm mobile
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công (1561 module,
+  babel plugin Reanimated hoạt động đúng — không lỗi worklets).
+- `financial-engine` vẫn 33/33 test pass.
+- Demo thật: mở app → card Dashboard xuất hiện theo thứ tự có stagger nhẹ, vòng tròn FI %
+  và số Net Worth đếm lên từ 0 trong khoảng 1 giây. Vào Assets sửa 1 khoản → quay lại Home →
+  vòng tròn/số **animate sang giá trị mới** (không snap tức thì). Bấm bất kỳ nút nào (Save,
+  Record snapshot, Continue) → thấy scale nhún nhẹ + rung haptic nhẹ trên thiết bị thật (haptic
+  không có tác dụng trên emulator không hỗ trợ).
+
+### Việc còn lại
+Đây là phase cuối theo kế hoạch prompt.md. Việc còn lại là polish tự do / bugfix phát sinh
+khi dùng thật, không còn phase nào được định nghĩa sẵn.
 
 ---
 
