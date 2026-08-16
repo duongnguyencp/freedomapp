@@ -38,7 +38,10 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
+    // Extra bottom room: the tab bar floats (position: absolute, glass
+    // effect) instead of reserving layout space, so content needs to
+    // clear it manually to avoid the last card sitting behind it.
+    paddingBottom: spacing.xxl + 64,
     gap: spacing.md,
   },
 });

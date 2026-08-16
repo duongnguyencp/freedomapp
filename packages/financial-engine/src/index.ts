@@ -5,3 +5,4 @@ export * from './savingsRate';
 export * from './fiProgress';
 export * from './projection';
 export * from './whatIf';
+export * from './withdrawal';

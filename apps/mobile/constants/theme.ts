@@ -30,6 +30,16 @@ export const colors = {
   successSoft: '#E8F6ED',
 
   track: '#DCD3F2', // deliberately a step darker than surfaceTinted so the progress bar reads on the hero card too
+
+  // Glass (frosted) surfaces — tab bar, buttons, slider track. A translucent
+  // white wash + a brighter top-edge border is what reads as "glass" once
+  // it's over a BlurView (tab bar) or just a flat lavender background
+  // (buttons/slider, where a literal blur has nothing to blur).
+  glassFill: 'rgba(255, 255, 255, 0.55)',
+  glassFillStrong: 'rgba(255, 255, 255, 0.72)',
+  glassBorder: 'rgba(255, 255, 255, 0.8)',
+  glassInkFill: 'rgba(22, 21, 40, 0.72)', // for the dark/primary glass button
+  glassInkBorder: 'rgba(255, 255, 255, 0.18)',
 } as const;
 
 export const spacing = {

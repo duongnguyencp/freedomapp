@@ -7,6 +7,7 @@ import { FormField } from '@/components/FormField';
 import { spacing } from '@/constants/theme';
 
 import { CategoryChips } from './CategoryChips';
+import { GoldPriceHelper } from './GoldPriceHelper';
 
 type Category = { value: string; label: string };
 
@@ -63,6 +64,7 @@ export function EntryForm({
         placeholder="0"
         suffix="VND"
       />
+      {category === 'gold' ? <GoldPriceHelper onApply={(vnd) => setValue(String(vnd))} /> : null}
       <View style={styles.actions}>
         {onDelete ? (
           <View style={styles.actionFlex}>

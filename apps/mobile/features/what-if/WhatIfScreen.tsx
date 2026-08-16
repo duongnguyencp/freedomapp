@@ -5,8 +5,9 @@ import { calculateProjectedFIDate, calculateWhatIf } from 'financial-engine';
 
 import { Card } from '@/components/Card';
 import { FormField } from '@/components/FormField';
+import { GlassSurface } from '@/components/GlassSurface';
 import { Screen } from '@/components/Screen';
-import { colors, spacing, typography } from '@/constants/theme';
+import { colors, radius, spacing, typography } from '@/constants/theme';
 import { useFinancialSummary } from '@/hooks/useFinancialSummary';
 import { formatCompactVND } from '@/services/format';
 
@@ -80,16 +81,19 @@ export function WhatIfScreen() {
           <Text style={styles.label}>Thêm mỗi tháng</Text>
           <Text style={styles.sliderValue}>+{formatCompactVND(additionalInvestment)}</Text>
         </View>
-        <Slider
-          minimumValue={0}
-          maximumValue={MAX_ADDITIONAL_INVESTMENT}
-          step={SLIDER_STEP}
-          value={additionalInvestment}
-          onValueChange={setAdditionalInvestment}
-          minimumTrackTintColor={colors.accent}
-          maximumTrackTintColor={colors.track}
-          thumbTintColor={colors.accent}
-        />
+        <GlassSurface tone="light" borderRadius={radius.pill} style={styles.sliderGlass}>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={MAX_ADDITIONAL_INVESTMENT}
+            step={SLIDER_STEP}
+            value={additionalInvestment}
+            onValueChange={setAdditionalInvestment}
+            minimumTrackTintColor={colors.accent}
+            maximumTrackTintColor="transparent"
+            thumbTintColor={colors.accent}
+          />
+        </GlassSurface>
         <View style={styles.sliderBounds}>
           <Text style={styles.boundLabel}>+0</Text>
           <Text style={styles.boundLabel}>+{formatCompactVND(MAX_ADDITIONAL_INVESTMENT)}</Text>
@@ -178,6 +182,14 @@ const styles = StyleSheet.create({
   sliderValue: {
     ...typography.title,
     color: colors.accent,
+  },
+  sliderGlass: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
   },
   sliderBounds: {
     flexDirection: 'row',

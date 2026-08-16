@@ -120,6 +120,31 @@ export function calculateProjectedFIDate(
   };
 }
 
+export interface CoastFIParams {
+  fiNumber: number;
+  /** Decimal annual return, e.g. 0.07 for 7%. */
+  annualReturnRate: number;
+  yearsToTarget: number;
+}
+
+/**
+ * Coast FI number: the net worth that needs no further contributions —
+ * left alone, compound growth by itself reaches the FI number by the
+ * target date.
+ *
+ * Coast FI Number = FI Number / (1 + annualReturnRate) ^ yearsToTarget
+ */
+export function calculateCoastFINumber({
+  fiNumber,
+  annualReturnRate,
+  yearsToTarget,
+}: CoastFIParams): number {
+  if (yearsToTarget <= 0) {
+    return fiNumber;
+  }
+  return fiNumber / Math.pow(1 + annualReturnRate, yearsToTarget);
+}
+
 function annualRateToMonthlyRate(annualRate: number): number {
   return Math.pow(1 + annualRate, 1 / 12) - 1;
 }

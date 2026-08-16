@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import {
+  calculateCoastFINumber,
   calculateFutureValue,
+  calculateMonthlyWithdrawal,
   calculateProjectedFIDate,
   calculateSavingsRate,
   type ProjectedFIDate,
@@ -9,6 +11,8 @@ import {
 import { useFinancialSummary } from '@/hooks/useFinancialSummary';
 import { monthLabel } from '@/services/date';
 import { useSnapshotsStore } from '@/stores/snapshotsStore';
+
+const MAX_GOAL_CHART_YEARS = 40;
 
 export interface DashboardData {
   netWorth: number;
@@ -20,7 +24,16 @@ export interface DashboardData {
   projectedFIDate: ProjectedFIDate | null;
   netWorthHistory: { label: string; value: number }[];
   /** Set only when the profile has a targetAge later than the current age. */
-  targetAgeProjection: { age: number; value: number } | null;
+  targetAgeProjection: {
+    age: number;
+    value: number;
+    monthlyWithdrawal: number;
+    /** Coast FI: net worth needed *today* to reach the FI number by targetAge with no further contributions. */
+    coastFINumber: number;
+    coastAchieved: boolean;
+  } | null;
+  /** Forward-looking path from today to the FI goal — year label vs. projected net worth. */
+  goalProjection: { label: string; value: number }[];
 }
 
 /**
@@ -69,7 +82,7 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       value: snapshot.netWorth,
     }));
 
-    let targetAgeProjection: { age: number; value: number } | null = null;
+    let targetAgeProjection: DashboardData['targetAgeProjection'] = null;
     if (profile.targetAge !== undefined && profile.targetAge > profile.age) {
       const months = Math.round((profile.targetAge - profile.age) * 12);
       const value = calculateFutureValue({
@@ -78,7 +91,40 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
         annualReturnRate: profile.expectedAnnualReturn,
         months,
       });
-      targetAgeProjection = { age: profile.targetAge, value };
+      const monthlyWithdrawal = calculateMonthlyWithdrawal(value, profile.safeWithdrawalRate);
+      const coastFINumber = calculateCoastFINumber({
+        fiNumber,
+        annualReturnRate: profile.expectedAnnualReturn,
+        yearsToTarget: profile.targetAge - profile.age,
+      });
+      targetAgeProjection = {
+        age: profile.targetAge,
+        value,
+        monthlyWithdrawal,
+        coastFINumber,
+        coastAchieved: netWorth >= coastFINumber,
+      };
+    }
+
+    // Forward path to the goal: one point per year from now until the FI
+    // date (capped), so "years" reads on the x-axis and "accumulated
+    // money" on the y-axis — a projection, not history like netWorthHistory.
+    const goalProjection: { label: string; value: number }[] = [];
+    if (projectedFIDate) {
+      const currentYear = new Date().getFullYear();
+      const totalYears = Math.min(
+        Math.max(projectedFIDate.year - currentYear, 1),
+        MAX_GOAL_CHART_YEARS,
+      );
+      for (let year = 0; year <= totalYears; year++) {
+        const value = calculateFutureValue({
+          presentValue: netWorth,
+          monthlyContribution: monthlyInvestment,
+          annualReturnRate: profile.expectedAnnualReturn,
+          months: year * 12,
+        });
+        goalProjection.push({ label: String(currentYear + year), value });
+      }
     }
 
     return {
@@ -91,6 +137,7 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       projectedFIDate,
       netWorthHistory,
       targetAgeProjection,
+      goalProjection,
     };
   }, [allReady, summary, profile, snapshots]);
 

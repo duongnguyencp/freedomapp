@@ -35,10 +35,14 @@ export function DashboardScreen() {
     projectedFIDate,
     netWorthHistory,
     targetAgeProjection,
+    goalProjection,
   } = data;
 
   const showChart = netWorthHistory.length >= 2;
-  let nextIndex = 2;
+  const showGoalProjection = goalProjection.length >= 2;
+  let nextIndex = 1;
+  const goalProjectionIndex = showGoalProjection ? nextIndex++ : -1;
+  const netWorthIndex = nextIndex++;
   const targetAgeIndex = targetAgeProjection ? nextIndex++ : -1;
   const metricRowIndex = nextIndex++;
   const chartIndex = showChart ? nextIndex++ : -1;
@@ -109,7 +113,21 @@ export function DashboardScreen() {
         </Card>
       </AnimatedEntrance>
 
-      <AnimatedEntrance index={1}>
+      {showGoalProjection ? (
+        <AnimatedEntrance index={goalProjectionIndex}>
+          <Card>
+            <Text style={styles.progressTitle}>Lộ trình đến mục tiêu FI</Text>
+            <MiniLineChart
+              labels={goalProjection.map((point) => point.label)}
+              values={goalProjection.map((point) => point.value)}
+              formatValue={formatCompactVND}
+              height={140}
+            />
+          </Card>
+        </AnimatedEntrance>
+      ) : null}
+
+      <AnimatedEntrance index={netWorthIndex}>
         <Card>
           <Text style={styles.label}>TÀI SẢN RÒNG</Text>
           <AnimatedNumber
@@ -125,6 +143,17 @@ export function DashboardScreen() {
           <Card>
             <Text style={styles.label}>TÀI SẢN DỰ KIẾN Ở TUỔI {targetAgeProjection.age}</Text>
             <Text style={styles.netWorthValue}>{formatCompactVND(targetAgeProjection.value)}</Text>
+            <Text style={styles.withdrawalHint}>
+              Có thể chi tiêu ~{formatCompactVND(targetAgeProjection.monthlyWithdrawal)}/tháng
+              (theo tỷ lệ rút an toàn)
+            </Text>
+            <View style={styles.divider} />
+            <Text style={styles.caption}>Coast FI</Text>
+            <Text style={styles.coastText}>
+              {targetAgeProjection.coastAchieved
+                ? `Bạn đã Coast FI — chỉ cần để ${formatCompactVND(targetAgeProjection.coastFINumber)} tăng trưởng tự nhiên, không cần góp thêm, vẫn tới mục tiêu ở tuổi ${targetAgeProjection.age}.`
+                : `Cần có ít nhất ${formatCompactVND(targetAgeProjection.coastFINumber)} ngay bây giờ để chỉ riêng tăng trưởng tự nhiên đủ tới mục tiêu ở tuổi ${targetAgeProjection.age} (chưa tính góp thêm).`}
+            </Text>
           </Card>
         </AnimatedEntrance>
       ) : null}
@@ -245,6 +274,17 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginTop: spacing.sm,
     padding: 0,
+  },
+  withdrawalHint: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+  },
+  coastText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    lineHeight: 18,
   },
   metricRow: {
     flexDirection: 'row',

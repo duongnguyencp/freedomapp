@@ -4,13 +4,15 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   type GestureResponderEvent,
   type PressableProps,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors, radius, spacing, typography } from '@/constants/theme';
+import { colors, radius, typography } from '@/constants/theme';
+import { GlassSurface } from '@/components/GlassSurface';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
@@ -61,6 +63,12 @@ export function Button({
     [onPress],
   );
 
+  const content = loading ? (
+    <ActivityIndicator color={variant === 'secondary' ? colors.ink : '#FFFFFF'} />
+  ) : (
+    <Text style={[styles.label, variant === 'secondary' && styles.labelSecondary]}>{label}</Text>
+  );
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -70,15 +78,17 @@ export function Button({
       onPress={handlePress}
       {...rest}
     >
-      <Animated.View
-        style={[styles.base, variantStyles[variant], isDisabled && styles.disabled, animatedStyle]}
-      >
-        {loading ? (
-          <ActivityIndicator color={variant === 'secondary' ? colors.ink : '#FFFFFF'} />
+      <Animated.View style={[isDisabled && styles.disabled, animatedStyle]}>
+        {variant === 'danger' ? (
+          <View style={[styles.base, styles.danger]}>{content}</View>
         ) : (
-          <Text style={[styles.label, variant === 'secondary' && styles.labelSecondary]}>
-            {label}
-          </Text>
+          <GlassSurface
+            tone={variant === 'primary' ? 'dark' : 'light'}
+            style={styles.base}
+            borderRadius={radius.pill}
+          >
+            <View style={styles.baseInner}>{content}</View>
+          </GlassSurface>
         )}
       </Animated.View>
     </Pressable>
@@ -87,8 +97,15 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.pill,
     paddingVertical: 16,
+  },
+  baseInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  danger: {
+    backgroundColor: '#DC2626',
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -102,17 +119,5 @@ const styles = StyleSheet.create({
   },
   labelSecondary: {
     color: colors.ink,
-  },
-});
-
-const variantStyles = StyleSheet.create({
-  primary: {
-    backgroundColor: colors.ink,
-  },
-  secondary: {
-    backgroundColor: colors.accentSoft,
-  },
-  danger: {
-    backgroundColor: '#DC2626',
   },
 });

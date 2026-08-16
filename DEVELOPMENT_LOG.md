@@ -580,6 +580,82 @@ apps/mobile/features/dashboard/DashboardScreen.tsx      + card mới
 
 ---
 
+## Đợt tính năng lớn: công thức formula.md, chart lộ trình, glass UI, giá vàng live
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+Người dùng gửi `formula.md` (prompt FIRE calculator tham khảo) và yêu cầu 5 việc cùng lúc.
+Đã hỏi rõ 2 điểm xung đột với nguyên tắc gốc trước khi làm (API giá vàng phá "offline-first";
+phạm vi glass UI) — người dùng xác nhận muốn làm cả 2.
+
+### 1. Công thức mới từ formula.md
+- `financial-engine`: thêm `calculateCoastFINumber` (Coast FI Number = FI Number ÷
+  (1+lợi nhuận)^số năm còn lại) và `calculateAnnualWithdrawal`/`calculateMonthlyWithdrawal`
+  (Số tiền rút = Tài sản ròng × SWR). FI Number hiện có (`annualSpending / SWR`) đã tương
+  đương công thức `×25` trong file — không cần sửa.
+- 7 test mới (`coastFI.test.ts`, `withdrawal.test.ts`) → financial-engine giờ **40/40 test
+  pass**.
+- **Chưa làm:** bảng 3 kịch bản SWR (3%/3,5%/4%) và Rule of 72 — không nằm trong 5 yêu cầu cụ
+  thể của người dùng ở tin nhắn này, để dành nếu cần sau.
+
+### 2. Biểu đồ "Lộ trình đến mục tiêu FI"
+- Card mới trên Home, trục ngang = năm (2026, 2027...), trục dọc = tài sản tích luỹ dự kiến
+  — khác với chart "Tiến độ của bạn" (dữ liệu lịch sử từ snapshot đã ghi). Đây là **chiếu
+  tương lai thuần** dùng `calculateFutureValue` tại từng mốc năm, không cần snapshot nào.
+  Giới hạn tối đa 40 năm hiển thị (`MAX_GOAL_CHART_YEARS`), chỉ hiện khi có ≥2 điểm.
+
+### 3. Glass UI (kính mờ) — toàn app
+- `expo-blur` + component dùng chung `GlassSurface` (blur thật + lớp phủ trong suốt + viền
+  sáng để "bán" hiệu ứng kính).
+- Tab bar dưới cùng: `position: absolute`, nền trong suốt + `BlurView` — kính mờ thật (đằng
+  sau có nội dung cuộn qua để blur). Tăng `paddingBottom` của `Screen` vì tab bar giờ nổi,
+  không chiếm layout.
+- `Button` (primary/secondary): nền kính mờ thay màu phẳng; riêng nút `danger` (Xoá) **giữ
+  màu đỏ đặc** — không làm kính để không giảm độ rõ ràng của hành động phá huỷ.
+- Slider (What-if): bọc trong `GlassSurface`.
+
+### 4. API giá vàng SJC (chấp nhận phá offline-first, đã xác nhận với người dùng)
+- `services/goldPrice.ts` gọi `api.vnappmob.com` — **best-effort, opt-in**: chỉ gọi khi người
+  dùng bấm "Lấy giá vàng hôm nay", lỗi mạng không chặn gì cả, luôn có thể nhập tay VNĐ như cũ.
+- `GoldPriceHelper` — chỉ hiện khi category = Vàng: bấm lấy giá → nhập "Số chỉ" → bấm Áp dụng
+  → tự điền vào ô Giá trị (VNĐ).
+- **Rủi ro đã ghi nhận:** không kiểm thử được API thật trong sandbox (fetch chạy trên máy
+  người dùng, không phải server dev) — nếu response shape khác dự kiến, tính năng chỉ hiện
+  lỗi và fallback nhập tay, không crash gì khác.
+
+### 5. Số tiền có thể hưởng ở tuổi mục tiêu
+- Card "Tài sản dự kiến ở tuổi X" thêm dòng "Có thể chi tiêu ~₫Y/tháng" (dùng
+  `calculateMonthlyWithdrawal`) + khối Coast FI (đã đạt Coast FI chưa, cần bao nhiêu ngay bây
+  giờ nếu chưa).
+
+### Files chính
+```
+packages/financial-engine/src/{projection,withdrawal}.ts   + calculateCoastFINumber, withdrawal
+packages/financial-engine/tests/{coastFI,withdrawal}.test.ts
+apps/mobile/components/GlassSurface.tsx
+apps/mobile/components/{Button,Screen}.tsx                 (glass, padding)
+apps/mobile/app/(tabs)/_layout.tsx                          (tab bar glass)
+apps/mobile/features/what-if/WhatIfScreen.tsx               (slider glass)
+apps/mobile/services/goldPrice.ts
+apps/mobile/features/assets/{GoldPriceHelper,EntryForm}.tsx
+apps/mobile/features/dashboard/{useDashboardData,DashboardScreen}.tsx
+```
+
+### Cách chạy
+```bash
+pnpm mobile
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công.
+- `financial-engine` 40/40 test pass (7 test mới).
+- Demo thật: Home hiện tab bar kính mờ nổi dưới cùng, thấy nội dung cuộn qua mờ phía sau; các
+  nút giờ có nền kính; card "Lộ trình đến mục tiêu FI" (nếu đã có dự kiến đạt FI) hiện chart
+  theo năm; Assets → thêm tài sản Vàng → bấm "Lấy giá vàng hôm nay" → nhập số chỉ → Áp dụng →
+  giá trị VNĐ tự điền.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,
