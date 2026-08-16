@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -146,6 +148,17 @@ export function SettingsScreen() {
         <Text style={styles.error}>{describeError(parsedAge, parsedSwr, targetAge, parsedTargetAge)}</Text>
       ) : null}
       <Text style={styles.hint}>Đơn vị tiền tệ: {profile.currency}</Text>
+
+      <Link href="/glossary" asChild>
+        <Pressable>
+          {({ pressed }) => (
+            <Card style={[styles.linkCard, pressed && styles.linkCardPressed]}>
+              <Text style={styles.linkLabel}>📖 Giải thích các thông số</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Card>
+          )}
+        </Pressable>
+      </Link>
     </Screen>
   );
 }
@@ -193,5 +206,19 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.warm,
     textAlign: 'center',
+  },
+  linkCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+  },
+  linkCardPressed: {
+    opacity: 0.7,
+  },
+  linkLabel: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
 });

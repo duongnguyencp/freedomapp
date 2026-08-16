@@ -702,6 +702,36 @@ apps/mobile/features/what-if/WhatIfScreen.tsx    (+ bảng kịch bản, cảnh 
 
 ---
 
+## Tính năng mới: Trang "Giải thích thông số"
+
+**Trạng thái:** ✅ Done — 2026-08-16
+
+### Bối cảnh
+Người dùng cần 1 nơi giải nghĩa các thuật ngữ/công thức (FI Number, SWR, Coast FIRE, Rule of
+72, Tỷ lệ tiết kiệm...) bằng ngôn ngữ dễ hiểu, không phải định nghĩa FIRE chung chung mà khớp
+đúng công thức app đang dùng.
+
+### Đã implement
+- `features/glossary/GlossaryScreen.tsx`: nội dung tĩnh, chia 3 nhóm (Hồ sơ tài chính / Chỉ số
+  trên Trang chủ / Công cụ nâng cao), mỗi mục có tên + giải thích + công thức (nếu có).
+- Route mới `app/glossary.tsx` — pushed screen có header, **không thêm tab thứ 5** (đúng
+  constraint chỉ 4 tab), vào từ link "📖 Giải thích các thông số" ở cuối màn Cài đặt.
+
+### Files chính
+```
+apps/mobile/app/glossary.tsx
+apps/mobile/app/_layout.tsx                      (+ Stack.Screen "glossary")
+apps/mobile/features/glossary/GlossaryScreen.tsx
+apps/mobile/features/settings/SettingsScreen.tsx  (+ link)
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export` bundle thành công, `financial-engine` vẫn 47/47 test pass
+  (không đụng logic tính toán).
+- Demo thật: Cài đặt → cuộn xuống cuối → "Giải thích các thông số" → thấy đủ 3 nhóm giải thích.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,
