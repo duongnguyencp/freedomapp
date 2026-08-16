@@ -1,46 +1,44 @@
-// Live SJC gold price (VND per "chỉ" — 1 chỉ = 3.75g). Best-effort only:
-// per prompt.md the app must keep working fully offline, so this is the
-// one deliberate exception (opt-in, only touched when the user taps
-// "Lấy giá vàng hôm nay") — every caller must handle failure by falling
-// back to manual VND entry, never block on it.
+// Live gold price lookup — the one deliberate exception to "no price APIs"
+// in this otherwise fully-offline app (explicitly requested). Always
+// degrades to manual VND entry on any failure; never blocks the form.
 
-export interface GoldPricePerChi {
-  buyPrice: number;
-  sellPrice: number;
+const GOLD_API_URL = 'https://www.vang.today/api/prices';
+// SJC 9999 — the most commonly held gold-bar brand in Vietnam for savings.
+const GOLD_TYPE_CODE = 'SJL1L10';
+const CHI_PER_LUONG = 10;
+
+export interface GoldPrice {
+  name: string;
+  /** VND per lượng (10 chỉ / 37.5g). */
+  buyPerLuong: number;
+  sellPerLuong: number;
 }
 
-const GOLD_API_URL = 'https://api.vnappmob.com/api/v2/gold/sjc';
+interface VangTodayResponse {
+  success: boolean;
+  prices: Record<
+    string,
+    { name: string; buy: number; sell: number; currency: string }
+  >;
+}
 
-export async function fetchGoldPricePerChi(): Promise<GoldPricePerChi> {
+export async function fetchGoldPrice(): Promise<GoldPrice> {
   const response = await fetch(GOLD_API_URL);
   if (!response.ok) {
-    throw new Error(`Không lấy được giá vàng (mã lỗi ${response.status}).`);
+    throw new Error('Không lấy được giá vàng');
   }
 
-  const json = await response.json();
-  const entry = Array.isArray(json?.results)
-    ? json.results[0]
-    : Array.isArray(json)
-      ? json[0]
-      : json;
+  const json = (await response.json()) as VangTodayResponse;
+  const entry = json?.prices?.[GOLD_TYPE_CODE];
 
-  const buyPrice = toNumber(entry?.buy_1c ?? entry?.buy ?? entry?.buyPrice);
-  const sellPrice = toNumber(entry?.sell_1c ?? entry?.sell ?? entry?.sellPrice);
-
-  if (buyPrice === null || sellPrice === null) {
-    throw new Error('Không đọc được dữ liệu giá vàng.');
+  if (!json?.success || !entry || typeof entry.sell !== 'number') {
+    throw new Error('Dữ liệu giá vàng không hợp lệ');
   }
 
-  return { buyPrice, sellPrice };
+  return { name: entry.name, buyPerLuong: entry.buy, sellPerLuong: entry.sell };
 }
 
-function toNumber(value: unknown): number | null {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    const parsed = Number(value.replace(/,/g, ''));
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-  return null;
+/** Converts a quantity in "chỉ" (1/10 lượng) to VND at a given lượng price. */
+export function chiToVND(chi: number, pricePerLuong: number): number {
+  return (chi / CHI_PER_LUONG) * pricePerLuong;
 }

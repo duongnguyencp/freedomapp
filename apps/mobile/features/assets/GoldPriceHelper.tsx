@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import { FormField } from '@/components/FormField';
 import { colors, radius, spacing, typography } from '@/constants/theme';
 import { formatVND } from '@/services/format';
-import { fetchGoldPricePerChi, type GoldPricePerChi } from '@/services/goldPrice';
+import { chiToVND, fetchGoldPrice, type GoldPrice } from '@/services/goldPrice';
 
 type Status = 'idle' | 'loading' | 'error';
 
@@ -21,14 +21,14 @@ type GoldPriceHelperProps = {
 export function GoldPriceHelper({ onApply }: GoldPriceHelperProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [price, setPrice] = useState<GoldPricePerChi | null>(null);
+  const [price, setPrice] = useState<GoldPrice | null>(null);
   const [chi, setChi] = useState('');
 
   async function handleFetch() {
     setStatus('loading');
     setErrorMessage('');
     try {
-      const result = await fetchGoldPricePerChi();
+      const result = await fetchGoldPrice();
       setPrice(result);
       setStatus('idle');
     } catch (error) {
@@ -40,14 +40,16 @@ export function GoldPriceHelper({ onApply }: GoldPriceHelperProps) {
 
   const parsedChi = Number(chi.replace(',', '.'));
   const suggestedValue =
-    price && Number.isFinite(parsedChi) && parsedChi > 0 ? Math.round(parsedChi * price.sellPrice) : null;
+    price && Number.isFinite(parsedChi) && parsedChi > 0
+      ? Math.round(chiToVND(parsedChi, price.sellPerLuong))
+      : null;
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>Tính theo giá vàng SJC hôm nay (không bắt buộc)</Text>
+      <Text style={styles.label}>Tính theo giá vàng {price ? price.name : 'SJC'} hôm nay (không bắt buộc)</Text>
 
       {price ? (
-        <Text style={styles.caption}>Giá bán: {formatVND(price.sellPrice)}/chỉ</Text>
+        <Text style={styles.caption}>Giá bán: {formatVND(price.sellPerLuong)}/lượng</Text>
       ) : (
         <Button
           label={status === 'loading' ? 'Đang lấy giá…' : 'Lấy giá vàng hôm nay'}

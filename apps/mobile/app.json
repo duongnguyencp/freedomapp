@@ -26,6 +26,13 @@
     "scheme": "freedompath",
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6eb636ab-6c8e-47e8-93cc-9dbf4e68fbd6"
+      }
+    },
+    "owner": "duongnamcp"
   }
 }
