@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { calculateProjectedFIDate, calculateWhatIf } from 'financial-engine';
+import {
+  calculateFIScenarios,
+  calculateProjectedFIDate,
+  calculateRuleOf72Years,
+  calculateWhatIf,
+} from 'financial-engine';
 
 import { Card } from '@/components/Card';
 import { FormField } from '@/components/FormField';
@@ -9,7 +14,7 @@ import { GlassSurface } from '@/components/GlassSurface';
 import { Screen } from '@/components/Screen';
 import { colors, radius, spacing, typography } from '@/constants/theme';
 import { useFinancialSummary } from '@/hooks/useFinancialSummary';
-import { formatCompactVND } from '@/services/format';
+import { formatCompactVND, formatPercent } from '@/services/format';
 
 const MAX_ADDITIONAL_INVESTMENT = 50_000_000;
 const SLIDER_STEP = 1_000_000;
@@ -66,6 +71,10 @@ export function WhatIfScreen() {
 
   const { whatIf, currentDate, newDate } = result;
   const difference = describeDifference(whatIf.yearsSaved);
+
+  const annualSpending = profile.monthlySpending * 12;
+  const scenarios = calculateFIScenarios(annualSpending, summary.netWorth);
+  const ruleOf72Years = calculateRuleOf72Years(profile.expectedAnnualReturn);
 
   return (
     <Screen edges={[]}>
@@ -130,6 +139,60 @@ export function WhatIfScreen() {
         <Text style={styles.label}>Chênh lệch</Text>
         <Text style={styles.difference}>{difference}</Text>
       </Card>
+
+      <Card style={styles.card}>
+        <Text style={styles.sectionTitle}>Theo tỷ lệ rút an toàn</Text>
+        <Text style={styles.sectionSubtitle}>
+          Chi tiêu {formatCompactVND(annualSpending)}/năm, tài sản ròng hiện tại{' '}
+          {formatCompactVND(summary.netWorth)}
+        </Text>
+
+        <View style={styles.tableHeaderRow}>
+          <Text style={[styles.tableCell, styles.tableHeaderText]}>SWR</Text>
+          <Text style={[styles.tableCell, styles.tableHeaderText, styles.tableCellRight]}>
+            Mục tiêu FI
+          </Text>
+          <Text style={[styles.tableCell, styles.tableHeaderText, styles.tableCellRight]}>
+            Rút được/tháng
+          </Text>
+        </View>
+        {scenarios.map((scenario) => (
+          <View key={scenario.safeWithdrawalRate} style={styles.tableRow}>
+            <Text style={styles.tableCell}>{formatPercent(scenario.safeWithdrawalRate * 100, 1)}</Text>
+            <Text style={[styles.tableCell, styles.tableCellRight]}>
+              {formatCompactVND(scenario.fiNumber)}
+            </Text>
+            <Text style={[styles.tableCell, styles.tableCellRight]}>
+              {formatCompactVND(scenario.monthlyWithdrawal)}
+            </Text>
+          </View>
+        ))}
+
+        <View style={styles.divider} />
+
+        <Text style={styles.label}>Rule of 72</Text>
+        <Text style={styles.sectionSubtitle}>
+          {ruleOf72Years !== null
+            ? `Với lợi nhuận kỳ vọng ${formatPercent(profile.expectedAnnualReturn * 100, 1)}/năm, tài sản của bạn sẽ tự nhân đôi sau khoảng ${ruleOf72Years.toFixed(1)} năm (không tính góp thêm).`
+            : 'Cần lợi nhuận kỳ vọng lớn hơn 0% để ước tính thời gian nhân đôi tài sản.'}
+        </Text>
+      </Card>
+
+      <View style={styles.disclaimerWrap}>
+        <Text style={styles.warningText}>
+          ⚠️ Quy tắc rút 4% dựa trên dữ liệu thị trường Mỹ, giả định nghỉ hưu ~30 năm. Nếu bạn
+          nghỉ hưu sớm (dưới 45 tuổi), nên cân nhắc tỷ lệ rút thấp hơn (3–3,5%) vì thời gian sống
+          sau đó dài hơn.
+        </Text>
+        <Text style={styles.warningText}>
+          ⚠️ "Sequence of returns risk": thị trường sụt mạnh ngay những năm đầu rút tiền nguy hiểm
+          hơn nhiều so với sụt muộn, dù lợi nhuận trung bình dài hạn giống nhau.
+        </Text>
+        <Text style={styles.disclaimerText}>
+          Đây là công cụ tính toán tham khảo dựa trên giả định bạn tự nhập, không phải lời khuyên
+          đầu tư hay tài chính cá nhân.
+        </Text>
+      </View>
     </Screen>
   );
 }
@@ -228,5 +291,54 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.warm,
     marginTop: spacing.xs,
+  },
+  sectionTitle: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  sectionSubtitle: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 18,
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    marginTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: spacing.xs,
+  },
+  tableCell: {
+    ...typography.caption,
+    color: colors.textPrimary,
+    flex: 1,
+  },
+  tableCellRight: {
+    textAlign: 'right',
+  },
+  tableHeaderText: {
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    fontWeight: '600',
+  },
+  disclaimerWrap: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+  warningText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    lineHeight: 18,
+  },
+  disclaimerText: {
+    ...typography.caption,
+    color: colors.textMuted,
+    lineHeight: 18,
+    fontStyle: 'italic',
   },
 });

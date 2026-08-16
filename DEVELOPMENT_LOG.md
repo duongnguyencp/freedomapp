@@ -656,6 +656,52 @@ pnpm mobile
 
 ---
 
+## Fix: giá vàng API sai đơn vị (lượng vs chỉ)
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+Test trực tiếp `https://www.vang.today/api/prices` (thay vì đoán) phát hiện giá trả về là
+**VNĐ/lượng** (10 chỉ), không phải VNĐ/chỉ như code trước đó giả định — nếu không sửa, giá trị
+tài sản vàng sẽ bị tính **gấp 10 lần**. Đã sửa `services/goldPrice.ts` (`fetchGoldPrice` trả
+`{buyPerLuong, sellPerLuong}`) + thêm `chiToVND()` quy đổi tường minh, dùng mã `SJL1L10` (SJC
+9999). Cũng commit `app.json` phần EAS project linkage (`projectId`/`owner`) do `eas init` tạo.
+
+---
+
+## Hoàn thiện formula.md: Rule of 72, bảng đa kịch bản SWR, cảnh báo rủi ro
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+### Bối cảnh
+Đối chiếu lại với `formula.md`, phần lõi (FI Number, Coast FIRE, thời gian tới FI) đã đúng công
+thức nhưng thiếu 4 mục file yêu cầu: Rule of 72, bảng so sánh 3 mức SWR (4%/3,5%/3%) cho cả FI
+Number lẫn số tiền rút được, cảnh báo rủi ro (sequence of returns, SWR thấp hơn khi nghỉ hưu
+sớm), và disclaimer "công cụ tham khảo, không phải lời khuyên tài chính".
+
+### Đã implement
+- `financial-engine`: `calculateRuleOf72Years` (72 ÷ %lợi nhuận) và `calculateFIScenarios`
+  (annualSpending, netWorth) → mảng 3 kịch bản `{safeWithdrawalRate, fiNumber,
+  annualWithdrawal, monthlyWithdrawal}` ở 4%/3,5%/3%, tái dùng `calculateFINumber` +
+  `calculateAnnualWithdrawal`/`calculateMonthlyWithdrawal` đã có — không viết công thức trùng.
+  7 test mới, `financial-engine` giờ 47/47.
+- **Không đặt ở Dashboard** (tránh "overload the dashboard") — thêm vào cuối màn **What-if**
+  (đã là màn "tính toán sâu hơn", đúng chỗ cho nội dung tham khảo này): bảng 3 dòng SWR/Mục
+  tiêu FI/Rút được mỗi tháng, dòng Rule of 72, 2 dòng cảnh báo rủi ro, và disclaimer cuối trang.
+
+### Files chính
+```
+packages/financial-engine/src/{ruleOf72,scenarios}.ts
+packages/financial-engine/tests/{ruleOf72,scenarios}.test.ts
+apps/mobile/features/what-if/WhatIfScreen.tsx    (+ bảng kịch bản, cảnh báo, disclaimer)
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export` bundle thành công, `financial-engine` 47/47 test pass.
+- Demo thật: Home → "Nếu đầu tư nhiều hơn?" → cuộn xuống cuối → thấy bảng 3 mức SWR đúng số
+  liệu, dòng Rule of 72, cảnh báo rủi ro, và disclaimer.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,
