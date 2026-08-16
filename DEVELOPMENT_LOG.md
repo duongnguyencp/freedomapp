@@ -14,7 +14,7 @@ Quy ước trạng thái: ✅ Done · 🔄 In progress · ⬜ Not started
 | 3     | Onboarding, assets, liabilities (CRUD) | ✅ |
 | 4     | Dashboard nối dữ liệu thật             | ✅ |
 | 5     | Snapshots + charts (net worth, FI)     | ✅ |
-| 6     | What-if calculator                     | ⬜ |
+| 6     | What-if calculator                     | ✅ |
 | 7     | Polish UI + motion design              | ⬜ |
 
 ---
@@ -365,14 +365,51 @@ apps/mobile/features/dashboard/DashboardScreen.tsx
 
 ## Phase 6 — What-if calculator
 
-**Trạng thái:** ⬜ Not started
+**Trạng thái:** ✅ Done — 2026-08-15
 
 ### Mục tiêu
 Slider thay đổi monthly investment (+0 → +50M) và expected annual return,
 show current FI date vs new FI date + số năm rút ngắn.
 
-### Cách verify / demo (khi xong)
-- Kéo slider +10M → FI date mới sớm hơn FI date hiện tại, số liệu khớp `calculateWhatIf`.
+### Đã implement
+- `@react-native-community/slider` (RN core đã bỏ Slider, cần package riêng).
+- `features/what-if/WhatIfScreen.tsx`: slider +0→+50,000,000 VND (bước 1,000,000), input
+  Expected annual return (prefill từ profile, sửa được), dùng thẳng `calculateWhatIf` +
+  `calculateProjectedFIDate` (financial-engine, không tính tay trong UI).
+- **Không thêm tab thứ 5** (đúng constraint "chỉ 4 tab") — What-if là 1 **pushed screen**
+  (`app/what-if.tsx`, `expo-router` Stack route thường, không phải trong `(tabs)`), vào từ
+  1 card "What if I invest more? →" ở cuối Dashboard. Không làm nặng Home (đúng "Do not
+  overload the dashboard").
+- Route `what-if` bật `headerShown: true` riêng ở root `_layout.tsx` (back button tự nhiên
+  của native stack) — các route khác vẫn `headerShown: false` như cũ.
+- `Screen` component thêm prop `edges` để tắt inset top khi màn đã có header native
+  (tránh double-safe-area giữa header và `SafeAreaView`).
+
+### Files chính
+```
+apps/mobile/app/what-if.tsx
+apps/mobile/app/_layout.tsx                      (+ Stack.Screen "what-if" có header)
+apps/mobile/features/what-if/WhatIfScreen.tsx
+apps/mobile/features/dashboard/DashboardScreen.tsx   (+ entry card)
+apps/mobile/components/Screen.tsx                (+ edges prop)
+```
+
+### Cách chạy
+```bash
+pnpm mobile
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công.
+- `financial-engine` vẫn 33/33 test pass.
+- Demo thật: Home → bấm "What if I invest more?" → kéo slider lên +10,000,000 → "New FI
+  date" nhỏ hơn "Current FI date", "Difference" hiện đúng số năm sớm hơn — khớp ví dụ trong
+  prompt.md (2038 → 2035 → "3 years earlier"). Sửa "Expected annual return" → kết quả cập
+  nhật lại theo đúng công thức.
+
+### Việc còn lại (chuyển sang Phase 7)
+- Chưa có animation/motion (progress ring animate, số đếm lên, chart drawing animation,
+  card entrance stagger, haptic feedback).
 
 ---
 

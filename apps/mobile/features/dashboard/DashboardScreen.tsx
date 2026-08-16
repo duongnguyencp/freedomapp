@@ -1,4 +1,6 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 
 import { Card } from '@/components/Card';
 import { FinancialMetric } from '@/components/FinancialMetric';
@@ -99,6 +101,17 @@ export function DashboardScreen() {
           />
         </Card>
       ) : null}
+
+      <Link href="/what-if" asChild>
+        <Pressable>
+          {({ pressed }) => (
+            <Card style={[styles.whatIfCard, pressed && styles.whatIfCardPressed]}>
+              <Text style={styles.whatIfLabel}>What if I invest more?</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Card>
+          )}
+        </Pressable>
+      </Link>
     </Screen>
   );
 }
@@ -173,5 +186,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textPrimary,
     marginBottom: spacing.sm,
+  },
+  whatIfCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+  },
+  whatIfCardPressed: {
+    opacity: 0.7,
+  },
+  whatIfLabel: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
 });
