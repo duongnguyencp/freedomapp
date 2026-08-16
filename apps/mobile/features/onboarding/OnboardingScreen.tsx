@@ -28,6 +28,7 @@ export function OnboardingScreen() {
   const [currentLiabilities, setCurrentLiabilities] = useState('');
   const [expectedAnnualReturn, setExpectedAnnualReturn] = useState('7');
   const [safeWithdrawalRate, setSafeWithdrawalRate] = useState('4');
+  const [inflationRate, setInflationRate] = useState('3');
   const [targetAge, setTargetAge] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -42,6 +43,7 @@ export function OnboardingScreen() {
       currentLiabilities: toNumberOrZero(currentLiabilities),
       expectedAnnualReturn: toNumberOrZero(expectedAnnualReturn),
       safeWithdrawalRate: toNumber(safeWithdrawalRate),
+      inflationRate: toNumberOrZero(inflationRate),
       // Optional — leave blank to skip the "projected assets at age X" card.
       targetAge: toNumber(targetAge),
     }),
@@ -53,6 +55,7 @@ export function OnboardingScreen() {
       currentLiabilities,
       expectedAnnualReturn,
       safeWithdrawalRate,
+      inflationRate,
       targetAge,
     ],
   );
@@ -71,6 +74,7 @@ export function OnboardingScreen() {
     parsed.expectedAnnualReturn !== null &&
     parsed.safeWithdrawalRate !== null &&
     parsed.safeWithdrawalRate > 0 &&
+    parsed.inflationRate !== null &&
     (targetAge.trim() === '' || (parsed.targetAge !== null && parsed.targetAge > 0));
 
   async function handleContinue() {
@@ -88,6 +92,7 @@ export function OnboardingScreen() {
         safeWithdrawalRate: parsed.safeWithdrawalRate! / 100,
         currency: 'VND',
         targetAge: parsed.targetAge ?? undefined,
+        inflationRate: parsed.inflationRate! / 100,
       });
 
       if (parsed.currentAssets! > 0) {
@@ -169,6 +174,13 @@ export function OnboardingScreen() {
           label="Tỷ lệ rút an toàn (SWR)"
           value={safeWithdrawalRate}
           onChangeText={setSafeWithdrawalRate}
+          keyboardType="numeric"
+          suffix="%"
+        />
+        <FormField
+          label="Lạm phát dự kiến/năm"
+          value={inflationRate}
+          onChangeText={setInflationRate}
           keyboardType="numeric"
           suffix="%"
         />

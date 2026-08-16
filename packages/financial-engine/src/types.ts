@@ -18,6 +18,12 @@ export interface UserProfile {
    * just a fixed-age snapshot the user wants to track. Omitted if unset.
    */
   targetAge?: number;
+  /**
+   * Expected annual inflation, decimal (e.g. 0.03 for 3%). Optional —
+   * callers should fall back to a documented default (3%) when unset,
+   * and always label it as an assumption.
+   */
+  inflationRate?: number;
 }
 
 export type AssetCategory =

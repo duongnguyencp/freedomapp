@@ -4,7 +4,9 @@ import {
   calculateFutureValue,
   calculateMonthlyWithdrawal,
   calculateProjectedFIDate,
+  calculateRealReturnRate,
   calculateSavingsRate,
+  DEFAULT_INFLATION_RATE,
   type ProjectedFIDate,
 } from 'financial-engine';
 
@@ -34,6 +36,9 @@ export interface DashboardData {
   } | null;
   /** Forward-looking path from today to the FI goal — year label vs. projected net worth. */
   goalProjection: { label: string; value: number }[];
+  /** Nominal return minus inflation (compounded correctly, not a naive subtraction). */
+  realReturnRate: number;
+  inflationRate: number;
 }
 
 /**
@@ -82,6 +87,13 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       value: snapshot.netWorth,
     }));
 
+    const inflationRate = profile.inflationRate ?? DEFAULT_INFLATION_RATE;
+    // Coast FIRE discounts the FI number — which is stated in TODAY's
+    // purchasing power — back to the present. That must use the REAL
+    // (inflation-adjusted) return, not the nominal one, or it understates
+    // how much is actually needed. (formula.md section 15.)
+    const realReturnRate = calculateRealReturnRate(profile.expectedAnnualReturn, inflationRate);
+
     let targetAgeProjection: DashboardData['targetAgeProjection'] = null;
     if (profile.targetAge !== undefined && profile.targetAge > profile.age) {
       const months = Math.round((profile.targetAge - profile.age) * 12);
@@ -94,7 +106,7 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       const monthlyWithdrawal = calculateMonthlyWithdrawal(value, profile.safeWithdrawalRate);
       const coastFINumber = calculateCoastFINumber({
         fiNumber,
-        annualReturnRate: profile.expectedAnnualReturn,
+        annualReturnRate: realReturnRate,
         yearsToTarget: profile.targetAge - profile.age,
       });
       targetAgeProjection = {
@@ -138,6 +150,8 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       netWorthHistory,
       targetAgeProjection,
       goalProjection,
+      realReturnRate,
+      inflationRate,
     };
   }, [allReady, summary, profile, snapshots]);
 

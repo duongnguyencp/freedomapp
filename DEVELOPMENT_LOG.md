@@ -732,6 +732,65 @@ apps/mobile/features/settings/SettingsScreen.tsx  (+ link)
 
 ---
 
+## Tính năng mới: Lạm phát + Lợi suất thực (theo bản formula.md mới)
+
+**Trạng thái:** ✅ Done (một phần) — 2026-08-16
+
+### Bối cảnh
+`formula.md` được viết lại toàn bộ, phức tạp hơn nhiều (16 phần): thêm lạm phát, lợi suất
+thực, FI Number tương lai theo lạm phát, mô phỏng rút tài sản dài hạn, FI Date có lạm phát,
+Coast FIRE dùng lợi suất thực (không phải danh nghĩa — bản cũ code đang làm SAI chỗ này), kịch
+bản sống X năm không thu nhập, 3 kịch bản bear/base/optimistic. Người dùng yêu cầu thêm tham số
+lạm phát và cho API World Bank (`FP.CPI.TOTL.ZG`, CPI Việt Nam) để lấy số liệu thật.
+
+**Chỉ làm phần lõi liên quan lạm phát trong lượt này** — phần mô phỏng dài hạn (FI Number
+tương lai, rút tài sản theo năm, FI Date có lạm phát, 3 kịch bản bear/base/optimistic) là việc
+lớn riêng, chưa làm, sẽ hỏi người dùng có muốn làm tiếp không.
+
+### Đã implement
+- `financial-engine`: `calculateRealReturnRate(nominal, inflation)` = (1+nominal)/(1+inflation)−1
+  (đúng công thức chính xác, KHÔNG dùng phép trừ đơn giản nominal−inflation như formula.md cảnh
+  báo). `DEFAULT_INFLATION_RATE = 0.03`. `UserProfile` thêm `inflationRate?: number`. 4 test mới,
+  `financial-engine` giờ **51/51**.
+- **Sửa lỗi Coast FIRE**: trước đây dùng lợi suất **danh nghĩa** để discount FI Number về hiện
+  tại — sai theo đúng cảnh báo trong formula.md ("Không được dùng lợi suất danh nghĩa để tính
+  Coast FIRE khi FI Number đang biểu diễn theo sức mua hiện tại"). Đã sửa dùng **lợi suất thực**.
+- `services/inflation.ts`: gọi API World Bank thật (đã test trực tiếp bằng curl trước khi code,
+  không đoán shape), lấy điểm dữ liệu CPI mới nhất có giá trị (dữ liệu World Bank trễ ~1 năm).
+  Cùng pattern "luôn có fallback nhập tay" như giá vàng.
+- Settings + Onboarding: thêm ô "Lạm phát dự kiến/năm" (mặc định 3% nếu để trống), nút "Lấy
+  lạm phát VN mới nhất", hiển thị "Lợi suất thực ≈ X%" tính live ngay dưới 2 ô lãi suất/lạm
+  phát — đúng yêu cầu "luôn hiển thị cả 3: danh nghĩa/lạm phát/thực".
+- Cập nhật Glossary: thêm mục Lạm phát, Lợi suất thực; sửa lại công thức Coast FIRE.
+
+### Files chính
+```
+packages/financial-engine/src/{realReturn,types}.ts
+packages/financial-engine/tests/realReturn.test.ts
+apps/mobile/services/inflation.ts
+apps/mobile/features/dashboard/useDashboardData.ts     (Coast FI dùng lợi suất thực)
+apps/mobile/features/settings/SettingsScreen.tsx        (+ ô lạm phát, nút fetch, lợi suất thực)
+apps/mobile/features/onboarding/OnboardingScreen.tsx    (+ ô lạm phát)
+apps/mobile/features/glossary/GlossaryScreen.tsx        (+ 2 mục, sửa công thức Coast FIRE)
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export` bundle thành công, `financial-engine` 51/51 test pass.
+- Demo thật: Cài đặt → thấy ô "Lạm phát dự kiến/năm" (mặc định 3%) + nút "Lấy lạm phát VN mới
+  nhất" → bấm → tự điền số CPI thật (~3,3% theo dữ liệu 2025) → thấy dòng "Lợi suất thực ≈ X%"
+  cập nhật ngay. Nếu đã nhập Tuổi mục tiêu, Coast FI Number trên Home giờ tính đúng theo lợi
+  suất thực (số sẽ khác — thường CAO hơn — so với trước khi sửa).
+
+### Việc còn lại (formula.md, nếu người dùng muốn làm tiếp)
+- Mô phỏng "nếu ngừng làm việc hôm nay, sống được bao lâu" (rút tài sản theo năm, chi tiêu tăng
+  theo lạm phát, tài sản tăng theo lợi suất danh nghĩa, tới khi cạn hoặc hết số năm mô phỏng).
+- FI Number tương lai có lạm phát (chi tiêu tương lai = chi tiêu hiện tại × (1+lạm phát)^X).
+- FI Date có tính lạm phát (FI Number mục tiêu tăng dần theo từng năm, không cố định).
+- Kịch bản sống X năm không thu nhập (2 kịch bản: không lợi nhuận / có đầu tư).
+- 3 kịch bản Bear/Base/Optimistic.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,

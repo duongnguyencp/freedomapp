@@ -4,6 +4,7 @@ export * from './fiNumber';
 export * from './savingsRate';
 export * from './fiProgress';
 export * from './projection';
+export * from './realReturn';
 export * from './ruleOf72';
 export * from './scenarios';
 export * from './whatIf';

@@ -23,9 +23,20 @@ const SECTIONS: Section[] = [
     title: 'Hồ sơ tài chính',
     entries: [
       {
-        term: 'Lợi nhuận đầu tư kỳ vọng/năm',
+        term: 'Lợi nhuận đầu tư kỳ vọng/năm (danh nghĩa)',
         definition:
-          'Mức tăng trưởng trung bình mỗi năm bạn kỳ vọng từ khoản đầu tư của mình (ví dụ chứng khoán, quỹ...). App dùng số này để tính tăng trưởng theo tháng, không tính lạm phát hay thuế.',
+          'Mức tăng trưởng trung bình mỗi năm bạn kỳ vọng từ khoản đầu tư của mình (ví dụ chứng khoán, quỹ...) — con số "trên giấy tờ", CHƯA trừ lạm phát. App dùng số này để tính tăng trưởng tài sản theo tháng, chưa tính thuế.',
+      },
+      {
+        term: 'Lạm phát dự kiến/năm',
+        definition:
+          'Mức giá cả tăng trung bình mỗi năm — làm giảm sức mua thực của tiền theo thời gian. Có thể tự nhập hoặc bấm "Lấy lạm phát VN mới nhất" để lấy số liệu CPI thật từ World Bank. Mặc định 3%/năm nếu để trống.',
+      },
+      {
+        term: 'Lợi suất thực',
+        definition:
+          'Lợi nhuận đầu tư sau khi đã trừ đi lạm phát — phản ánh đúng sức mua thực sự tăng thêm bao nhiêu, không phải chỉ số tiền tăng thêm bao nhiêu. Đây là số dùng để tính Coast FIRE (vì FI Number đã tính theo sức mua hiện tại).',
+        formula: 'Lợi suất thực = (1 + Lợi suất danh nghĩa) ÷ (1 + Lạm phát) − 1',
       },
       {
         term: 'Tỷ lệ rút an toàn (SWR)',
@@ -90,8 +101,8 @@ const SECTIONS: Section[] = [
       {
         term: 'Coast FIRE',
         definition:
-          'Số tiền bạn cần có NGAY BÂY GIỜ để, nếu không góp thêm một đồng nào nữa, chỉ riêng tăng trưởng tự nhiên cũng đủ đưa bạn tới FI Number đúng vào Tuổi mục tiêu. Nếu tài sản hiện tại đã vượt mức này, bạn đã "Coast FI" — có thể ngừng góp thêm mà vẫn về đích đúng hẹn.',
-        formula: 'Coast FI Number = FI Number ÷ (1 + Lợi nhuận kỳ vọng) ^ Số năm còn lại',
+          'Số tiền bạn cần có NGAY BÂY GIỜ để, nếu không góp thêm một đồng nào nữa, chỉ riêng tăng trưởng tự nhiên cũng đủ đưa bạn tới FI Number đúng vào Tuổi mục tiêu. Nếu tài sản hiện tại đã vượt mức này, bạn đã "Coast FI" — có thể ngừng góp thêm mà vẫn về đích đúng hẹn. Dùng Lợi suất thực (không phải danh nghĩa) vì FI Number đã tính theo sức mua hiện tại.',
+        formula: 'Coast FI Number = FI Number ÷ (1 + Lợi suất thực) ^ Số năm còn lại',
       },
       {
         term: 'Rule of 72',
