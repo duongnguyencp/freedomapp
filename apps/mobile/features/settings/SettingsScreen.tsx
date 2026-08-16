@@ -49,9 +49,12 @@ export function SettingsScreen() {
   }
 
   const parsedAge = toNumber(age);
-  const parsedIncome = toNumber(monthlyIncome);
-  const parsedSpending = toNumber(monthlySpending);
-  const parsedReturn = toNumber(expectedAnnualReturn);
+  // Income/spending/return can legitimately be 0 (no income right now,
+  // no spending tracked yet, 0% expected return) — an empty field means
+  // "0", not "invalid". Only age and SWR must be explicitly filled in.
+  const parsedIncome = toNumberOrZero(monthlyIncome);
+  const parsedSpending = toNumberOrZero(monthlySpending);
+  const parsedReturn = toNumberOrZero(expectedAnnualReturn);
   const parsedSwr = toNumber(safeWithdrawalRate);
 
   const isValid =
@@ -126,6 +129,9 @@ export function SettingsScreen() {
         disabled={!isValid}
         loading={saving}
       />
+      {!isValid ? (
+        <Text style={styles.error}>{describeError(parsedAge, parsedSwr)}</Text>
+      ) : null}
       <Text style={styles.hint}>Đơn vị tiền tệ: {profile.currency}</Text>
     </Screen>
   );
@@ -137,6 +143,22 @@ function toNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function toNumberOrZero(value: string): number | null {
+  if (value.trim() === '') return 0;
+  const parsed = Number(value.replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function describeError(parsedAge: number | null, parsedSwr: number | null): string {
+  if (parsedAge === null || parsedAge <= 0) {
+    return 'Tuổi hiện tại phải lớn hơn 0.';
+  }
+  if (parsedSwr === null || parsedSwr <= 0) {
+    return 'Tỷ lệ rút an toàn (SWR) phải lớn hơn 0%.';
+  }
+  return 'Vui lòng kiểm tra lại các trường bên trên.';
+}
+
 const styles = StyleSheet.create({
   card: {
     gap: spacing.lg,
@@ -144,6 +166,11 @@ const styles = StyleSheet.create({
   hint: {
     ...typography.caption,
     color: colors.textMuted,
+    textAlign: 'center',
+  },
+  error: {
+    ...typography.caption,
+    color: colors.warm,
     textAlign: 'center',
   },
 });

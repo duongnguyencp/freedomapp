@@ -32,12 +32,14 @@ export function OnboardingScreen() {
 
   const parsed = useMemo(
     () => ({
+      // Age and SWR must be explicitly filled in. Everything else can
+      // reasonably be 0 — an empty field means "0", not "invalid".
       age: toNumber(age),
-      monthlyIncome: toNumber(monthlyIncome),
-      monthlySpending: toNumber(monthlySpending),
-      currentAssets: toNumber(currentAssets),
-      currentLiabilities: toNumber(currentLiabilities),
-      expectedAnnualReturn: toNumber(expectedAnnualReturn),
+      monthlyIncome: toNumberOrZero(monthlyIncome),
+      monthlySpending: toNumberOrZero(monthlySpending),
+      currentAssets: toNumberOrZero(currentAssets),
+      currentLiabilities: toNumberOrZero(currentLiabilities),
+      expectedAnnualReturn: toNumberOrZero(expectedAnnualReturn),
       safeWithdrawalRate: toNumber(safeWithdrawalRate),
     }),
     [
@@ -168,6 +170,9 @@ export function OnboardingScreen() {
 
       <View style={styles.footer}>
         <Button label="Tiếp tục" onPress={handleContinue} disabled={!isValid} loading={saving} />
+        {!isValid ? (
+          <Text style={styles.error}>{describeError(parsed.age, parsed.safeWithdrawalRate)}</Text>
+        ) : null}
         <Text style={styles.hint}>Đơn vị tiền tệ hiện đang là VND.</Text>
       </View>
     </Screen>
@@ -182,6 +187,24 @@ function toNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function toNumberOrZero(value: string): number | null {
+  if (value.trim() === '') {
+    return 0;
+  }
+  const parsed = Number(value.replace(',', '.'));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function describeError(age: number | null, swr: number | null): string {
+  if (age === null || age <= 0) {
+    return 'Tuổi hiện tại phải lớn hơn 0.';
+  }
+  if (swr === null || swr <= 0) {
+    return 'Tỷ lệ rút an toàn (SWR) phải lớn hơn 0%.';
+  }
+  return 'Vui lòng kiểm tra lại các trường bên trên.';
+}
+
 const styles = StyleSheet.create({
   card: {
     gap: spacing.lg,
@@ -192,6 +215,11 @@ const styles = StyleSheet.create({
   hint: {
     ...typography.caption,
     color: colors.textMuted,
+    textAlign: 'center',
+  },
+  error: {
+    ...typography.caption,
+    color: colors.warm,
     textAlign: 'center',
   },
 });
