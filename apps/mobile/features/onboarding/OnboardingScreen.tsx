@@ -28,6 +28,7 @@ export function OnboardingScreen() {
   const [currentLiabilities, setCurrentLiabilities] = useState('');
   const [expectedAnnualReturn, setExpectedAnnualReturn] = useState('7');
   const [safeWithdrawalRate, setSafeWithdrawalRate] = useState('4');
+  const [targetAge, setTargetAge] = useState('');
   const [saving, setSaving] = useState(false);
 
   const parsed = useMemo(
@@ -41,6 +42,8 @@ export function OnboardingScreen() {
       currentLiabilities: toNumberOrZero(currentLiabilities),
       expectedAnnualReturn: toNumberOrZero(expectedAnnualReturn),
       safeWithdrawalRate: toNumber(safeWithdrawalRate),
+      // Optional — leave blank to skip the "projected assets at age X" card.
+      targetAge: toNumber(targetAge),
     }),
     [
       age,
@@ -50,6 +53,7 @@ export function OnboardingScreen() {
       currentLiabilities,
       expectedAnnualReturn,
       safeWithdrawalRate,
+      targetAge,
     ],
   );
 
@@ -66,7 +70,8 @@ export function OnboardingScreen() {
     parsed.currentLiabilities >= 0 &&
     parsed.expectedAnnualReturn !== null &&
     parsed.safeWithdrawalRate !== null &&
-    parsed.safeWithdrawalRate > 0;
+    parsed.safeWithdrawalRate > 0 &&
+    (targetAge.trim() === '' || (parsed.targetAge !== null && parsed.targetAge > 0));
 
   async function handleContinue() {
     if (!isValid || saving) {
@@ -82,6 +87,7 @@ export function OnboardingScreen() {
         expectedAnnualReturn: parsed.expectedAnnualReturn! / 100,
         safeWithdrawalRate: parsed.safeWithdrawalRate! / 100,
         currency: 'VND',
+        targetAge: parsed.targetAge ?? undefined,
       });
 
       if (parsed.currentAssets! > 0) {
@@ -166,12 +172,21 @@ export function OnboardingScreen() {
           keyboardType="numeric"
           suffix="%"
         />
+        <FormField
+          label="Tuổi mục tiêu (không bắt buộc)"
+          value={targetAge}
+          onChangeText={setTargetAge}
+          keyboardType="number-pad"
+          placeholder="vd: 35"
+        />
       </Card>
 
       <View style={styles.footer}>
         <Button label="Tiếp tục" onPress={handleContinue} disabled={!isValid} loading={saving} />
         {!isValid ? (
-          <Text style={styles.error}>{describeError(parsed.age, parsed.safeWithdrawalRate)}</Text>
+          <Text style={styles.error}>
+            {describeError(parsed.age, parsed.safeWithdrawalRate, targetAge, parsed.targetAge)}
+          </Text>
         ) : null}
         <Text style={styles.hint}>Đơn vị tiền tệ hiện đang là VND.</Text>
       </View>
@@ -195,12 +210,20 @@ function toNumberOrZero(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function describeError(age: number | null, swr: number | null): string {
+function describeError(
+  age: number | null,
+  swr: number | null,
+  targetAgeInput: string,
+  parsedTargetAge: number | null,
+): string {
   if (age === null || age <= 0) {
     return 'Tuổi hiện tại phải lớn hơn 0.';
   }
   if (swr === null || swr <= 0) {
     return 'Tỷ lệ rút an toàn (SWR) phải lớn hơn 0%.';
+  }
+  if (targetAgeInput.trim() !== '' && (parsedTargetAge === null || parsedTargetAge <= 0)) {
+    return 'Tuổi mục tiêu không hợp lệ.';
   }
   return 'Vui lòng kiểm tra lại các trường bên trên.';
 }

@@ -34,10 +34,15 @@ export function DashboardScreen() {
     monthlyInvestment,
     projectedFIDate,
     netWorthHistory,
+    targetAgeProjection,
   } = data;
 
   const showChart = netWorthHistory.length >= 2;
-  const whatIfIndex = showChart ? 4 : 3;
+  let nextIndex = 2;
+  const targetAgeIndex = targetAgeProjection ? nextIndex++ : -1;
+  const metricRowIndex = nextIndex++;
+  const chartIndex = showChart ? nextIndex++ : -1;
+  const whatIfIndex = nextIndex;
 
   return (
     <Screen>
@@ -115,7 +120,16 @@ export function DashboardScreen() {
         </Card>
       </AnimatedEntrance>
 
-      <AnimatedEntrance index={2}>
+      {targetAgeProjection ? (
+        <AnimatedEntrance index={targetAgeIndex}>
+          <Card>
+            <Text style={styles.label}>TÀI SẢN DỰ KIẾN Ở TUỔI {targetAgeProjection.age}</Text>
+            <Text style={styles.netWorthValue}>{formatCompactVND(targetAgeProjection.value)}</Text>
+          </Card>
+        </AnimatedEntrance>
+      ) : null}
+
+      <AnimatedEntrance index={metricRowIndex}>
         <View style={styles.metricRow}>
           <Card style={styles.metricCard}>
             <FinancialMetric label="Tỷ lệ tiết kiệm" value={formatPercent(savingsRate, 0)} />
@@ -127,7 +141,7 @@ export function DashboardScreen() {
       </AnimatedEntrance>
 
       {showChart ? (
-        <AnimatedEntrance index={3}>
+        <AnimatedEntrance index={chartIndex}>
           <Card>
             <Text style={styles.progressTitle}>Tiến độ của bạn</Text>
             <MiniLineChart

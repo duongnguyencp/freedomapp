@@ -12,6 +12,12 @@ export interface UserProfile {
   /** Decimal, e.g. 0.04 for 4%. */
   safeWithdrawalRate: number;
   currency: string;
+  /**
+   * Optional target age for a projected-net-worth checkpoint (e.g. "how
+   * much will I have by age 35?"). Independent of the FI number/date —
+   * just a fixed-age snapshot the user wants to track. Omitted if unset.
+   */
+  targetAge?: number;
 }
 
 export type AssetCategory =

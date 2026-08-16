@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { calculateProjectedFIDate, calculateSavingsRate, type ProjectedFIDate } from 'financial-engine';
+import {
+  calculateFutureValue,
+  calculateProjectedFIDate,
+  calculateSavingsRate,
+  type ProjectedFIDate,
+} from 'financial-engine';
 
 import { useFinancialSummary } from '@/hooks/useFinancialSummary';
 import { monthLabel } from '@/services/date';
@@ -14,6 +19,8 @@ export interface DashboardData {
   monthlyInvestment: number;
   projectedFIDate: ProjectedFIDate | null;
   netWorthHistory: { label: string; value: number }[];
+  /** Set only when the profile has a targetAge later than the current age. */
+  targetAgeProjection: { age: number; value: number } | null;
 }
 
 /**
@@ -62,6 +69,18 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       value: snapshot.netWorth,
     }));
 
+    let targetAgeProjection: { age: number; value: number } | null = null;
+    if (profile.targetAge !== undefined && profile.targetAge > profile.age) {
+      const months = Math.round((profile.targetAge - profile.age) * 12);
+      const value = calculateFutureValue({
+        presentValue: netWorth,
+        monthlyContribution: monthlyInvestment,
+        annualReturnRate: profile.expectedAnnualReturn,
+        months,
+      });
+      targetAgeProjection = { age: profile.targetAge, value };
+    }
+
     return {
       netWorth,
       fiNumber,
@@ -71,6 +90,7 @@ export function useDashboardData(): { status: 'loading' | 'ready'; data: Dashboa
       monthlyInvestment,
       projectedFIDate,
       netWorthHistory,
+      targetAgeProjection,
     };
   }, [allReady, summary, profile, snapshots]);
 

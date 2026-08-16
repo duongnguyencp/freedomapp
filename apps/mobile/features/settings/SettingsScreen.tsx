@@ -22,6 +22,7 @@ export function SettingsScreen() {
   const [monthlySpending, setMonthlySpending] = useState('');
   const [expectedAnnualReturn, setExpectedAnnualReturn] = useState('');
   const [safeWithdrawalRate, setSafeWithdrawalRate] = useState('');
+  const [targetAge, setTargetAge] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -38,6 +39,7 @@ export function SettingsScreen() {
     setMonthlySpending(String(profile.monthlySpending));
     setExpectedAnnualReturn(String(profile.expectedAnnualReturn * 100));
     setSafeWithdrawalRate(String(profile.safeWithdrawalRate * 100));
+    setTargetAge(profile.targetAge !== undefined ? String(profile.targetAge) : '');
   }, [profile]);
 
   if (status !== 'ready' || !profile) {
@@ -56,6 +58,8 @@ export function SettingsScreen() {
   const parsedSpending = toNumberOrZero(monthlySpending);
   const parsedReturn = toNumberOrZero(expectedAnnualReturn);
   const parsedSwr = toNumber(safeWithdrawalRate);
+  // Optional — leave blank to skip the "projected assets at age X" card.
+  const parsedTargetAge = toNumber(targetAge);
 
   const isValid =
     parsedAge !== null &&
@@ -66,7 +70,8 @@ export function SettingsScreen() {
     parsedSpending >= 0 &&
     parsedReturn !== null &&
     parsedSwr !== null &&
-    parsedSwr > 0;
+    parsedSwr > 0 &&
+    (targetAge.trim() === '' || (parsedTargetAge !== null && parsedTargetAge > 0));
 
   async function handleSave() {
     if (!isValid || !profile) return;
@@ -79,6 +84,7 @@ export function SettingsScreen() {
         monthlySpending: parsedSpending!,
         expectedAnnualReturn: parsedReturn! / 100,
         safeWithdrawalRate: parsedSwr! / 100,
+        targetAge: parsedTargetAge ?? undefined,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
@@ -121,6 +127,13 @@ export function SettingsScreen() {
           keyboardType="numeric"
           suffix="%"
         />
+        <FormField
+          label="Tuổi mục tiêu (không bắt buộc)"
+          value={targetAge}
+          onChangeText={setTargetAge}
+          keyboardType="number-pad"
+          placeholder="vd: 35"
+        />
       </Card>
 
       <Button
@@ -130,7 +143,7 @@ export function SettingsScreen() {
         loading={saving}
       />
       {!isValid ? (
-        <Text style={styles.error}>{describeError(parsedAge, parsedSwr)}</Text>
+        <Text style={styles.error}>{describeError(parsedAge, parsedSwr, targetAge, parsedTargetAge)}</Text>
       ) : null}
       <Text style={styles.hint}>Đơn vị tiền tệ: {profile.currency}</Text>
     </Screen>
@@ -149,12 +162,20 @@ function toNumberOrZero(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function describeError(parsedAge: number | null, parsedSwr: number | null): string {
+function describeError(
+  parsedAge: number | null,
+  parsedSwr: number | null,
+  targetAgeInput: string,
+  parsedTargetAge: number | null,
+): string {
   if (parsedAge === null || parsedAge <= 0) {
     return 'Tuổi hiện tại phải lớn hơn 0.';
   }
   if (parsedSwr === null || parsedSwr <= 0) {
     return 'Tỷ lệ rút an toàn (SWR) phải lớn hơn 0%.';
+  }
+  if (targetAgeInput.trim() !== '' && (parsedTargetAge === null || parsedTargetAge <= 0)) {
+    return 'Tuổi mục tiêu không hợp lệ.';
   }
   return 'Vui lòng kiểm tra lại các trường bên trên.';
 }

@@ -526,6 +526,60 @@ Gần như toàn bộ `apps/mobile/features/**`, `apps/mobile/app/**/_layout.tsx
 
 ---
 
+## Fix: ô Thu nhập/Chi tiêu để trống bị chặn lưu âm thầm
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+Onboarding và Settings coi ô trống = `null` (không hợp lệ) → nút Lưu/Tiếp tục bị disable
+âm thầm, không giải thích gì. Đã sửa: Thu nhập, Chi tiêu, Tài sản/Nợ ban đầu, Lợi nhuận kỳ
+vọng để trống giờ hiểu là 0 (giá trị hợp lệ). Tuổi và SWR vẫn bắt buộc nhập vì bằng 0 sẽ phá
+công thức FI. Thêm dòng lỗi hiện rõ dưới nút khi form chưa hợp lệ.
+
+## Fix: hiện 0%/"đã đạt được" mâu thuẫn khi FI Number = 0
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+Khi Chi tiêu hàng tháng = 0 → FI Number = 0 → Dashboard vừa hiện 0% vừa hiện "Bạn đã đạt
+được rồi 🎉" (remaining clamp về 0). Đã thêm guard: khi `fiNumber <= 0`, hiện thông báo rõ
+ràng + link vào Cài đặt thay vì số liệu mâu thuẫn.
+
+---
+
+## Tính năng mới: Tài sản dự kiến ở tuổi mục tiêu
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+### Bối cảnh
+Người dùng hỏi "không có chỗ nào ghi tài sản mục tiêu à" — muốn nhập 1 tuổi cố định (vd 35,
+không phải tuổi nghỉ hưu — là tuổi muốn có tài sản đảm bảo an toàn tài chính) và xem tài sản
+dự kiến sẽ có ở tuổi đó, dựa trên tốc độ đầu tư hiện tại.
+
+### Đã implement
+- `financial-engine`: thêm field optional `targetAge?: number` vào `UserProfile` (không đụng
+  hàm tính toán nào, không có test nào construct `UserProfile` literal nên không breaking).
+- Onboarding + Settings: thêm ô "Tuổi mục tiêu (không bắt buộc)" — để trống thì bỏ qua tính
+  năng này hoàn toàn.
+- Dashboard: card mới "Tài sản dự kiến ở tuổi X", dùng thẳng `calculateFutureValue` (đã có
+  từ Phase 2) với `presentValue = netWorth hiện tại`, `monthlyContribution = đầu tư hàng
+  tháng`, `months = (tuổi mục tiêu − tuổi hiện tại) × 12`. Chỉ hiện khi `targetAge` đã đặt và
+  lớn hơn tuổi hiện tại.
+
+### Files chính
+```
+packages/financial-engine/src/types.ts                 + targetAge?: number
+apps/mobile/features/onboarding/OnboardingScreen.tsx    + ô Tuổi mục tiêu
+apps/mobile/features/settings/SettingsScreen.tsx        + ô Tuổi mục tiêu
+apps/mobile/features/dashboard/useDashboardData.ts      + targetAgeProjection
+apps/mobile/features/dashboard/DashboardScreen.tsx      + card mới
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export` bundle thành công, `financial-engine` 33/33 test pass.
+- Demo thật: Cài đặt → nhập Tuổi mục tiêu 35 → Lưu → Home hiện card "Tài sản dự kiến ở tuổi
+  35: ₫X" tính đúng theo tốc độ đầu tư hiện tại. Xoá trống Tuổi mục tiêu → card biến mất.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,
