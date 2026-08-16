@@ -43,7 +43,7 @@ export function SettingsScreen() {
   if (status !== 'ready' || !profile) {
     return (
       <Screen>
-        <SectionHeader title="Settings" />
+        <SectionHeader title="Cài đặt" />
       </Screen>
     );
   }
@@ -86,33 +86,33 @@ export function SettingsScreen() {
 
   return (
     <Screen>
-      <SectionHeader title="Settings" subtitle="Financial assumptions" />
+      <SectionHeader title="Cài đặt" subtitle="Giả định tài chính" />
 
       <Card style={styles.card}>
-        <FormField label="Current age" value={age} onChangeText={setAge} keyboardType="number-pad" />
+        <FormField label="Tuổi hiện tại" value={age} onChangeText={setAge} keyboardType="number-pad" />
         <FormField
-          label="Monthly income"
+          label="Thu nhập hàng tháng"
           value={monthlyIncome}
           onChangeText={setMonthlyIncome}
           keyboardType="numeric"
           suffix="VND"
         />
         <FormField
-          label="Monthly spending"
+          label="Chi tiêu hàng tháng"
           value={monthlySpending}
           onChangeText={setMonthlySpending}
           keyboardType="numeric"
           suffix="VND"
         />
         <FormField
-          label="Expected annual return"
+          label="Lợi nhuận đầu tư kỳ vọng/năm"
           value={expectedAnnualReturn}
           onChangeText={setExpectedAnnualReturn}
           keyboardType="numeric"
           suffix="%"
         />
         <FormField
-          label="Safe withdrawal rate"
+          label="Tỷ lệ rút an toàn (SWR)"
           value={safeWithdrawalRate}
           onChangeText={setSafeWithdrawalRate}
           keyboardType="numeric"
@@ -121,12 +121,12 @@ export function SettingsScreen() {
       </Card>
 
       <Button
-        label={saved ? 'Saved' : 'Save changes'}
+        label={saved ? 'Đã lưu' : 'Lưu thay đổi'}
         onPress={handleSave}
         disabled={!isValid}
         loading={saving}
       />
-      <Text style={styles.hint}>Currency: {profile.currency}</Text>
+      <Text style={styles.hint}>Đơn vị tiền tệ: {profile.currency}</Text>
     </Screen>
   );
 }

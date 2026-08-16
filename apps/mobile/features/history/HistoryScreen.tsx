@@ -62,13 +62,13 @@ export function HistoryScreen() {
 
   return (
     <Screen>
-      <SectionHeader title="History" />
+      <SectionHeader title="Lịch sử" />
 
       <AnimatedEntrance index={0}>
         <Card style={styles.recordCard}>
-          <FinancialMetric label="Today's net worth" value={formatCompactVND(summary.netWorth)} />
+          <FinancialMetric label="Tài sản ròng hôm nay" value={formatCompactVND(summary.netWorth)} />
           <Button
-            label={recording ? 'Recording…' : 'Record snapshot'}
+            label={recording ? 'Đang lưu…' : 'Ghi lại số liệu'}
             onPress={handleRecord}
             loading={recording}
           />
@@ -79,7 +79,7 @@ export function HistoryScreen() {
         <AnimatedEntrance index={1}>
           <Card>
             <Text style={styles.empty}>
-              No snapshots yet. Record one above to start tracking your progress over time.
+              Chưa có số liệu nào. Ghi lại ở trên để bắt đầu theo dõi tiến độ theo thời gian.
             </Text>
           </Card>
         </AnimatedEntrance>
@@ -87,18 +87,18 @@ export function HistoryScreen() {
         <>
           <AnimatedEntrance index={1}>
             <Card>
-              <Text style={styles.chartTitle}>Net worth</Text>
+              <Text style={styles.chartTitle}>Tài sản ròng</Text>
               {hasTrend ? (
                 <MiniLineChart labels={labels} values={netWorthValues} formatValue={formatCompactVND} />
               ) : (
-                <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
+                <Text style={styles.empty}>Ghi thêm 1 lần nữa để thấy xu hướng.</Text>
               )}
             </Card>
           </AnimatedEntrance>
 
           <AnimatedEntrance index={2}>
             <Card>
-              <Text style={styles.chartTitle}>Financial Independence Progress</Text>
+              <Text style={styles.chartTitle}>Tiến độ Tự do Tài chính</Text>
               {hasTrend ? (
                 <MiniLineChart
                   labels={labels}
@@ -107,7 +107,7 @@ export function HistoryScreen() {
                   formatValue={(value) => formatPercent(value, 0)}
                 />
               ) : (
-                <Text style={styles.empty}>Record one more snapshot to see a trend.</Text>
+                <Text style={styles.empty}>Ghi thêm 1 lần nữa để thấy xu hướng.</Text>
               )}
             </Card>
           </AnimatedEntrance>
@@ -117,7 +117,7 @@ export function HistoryScreen() {
       {allocation.length > 0 ? (
         <AnimatedEntrance index={3}>
           <Card>
-            <Text style={styles.chartTitle}>Asset allocation</Text>
+            <Text style={styles.chartTitle}>Phân bổ tài sản</Text>
             <MiniPieChart slices={allocation} />
           </Card>
         </AnimatedEntrance>

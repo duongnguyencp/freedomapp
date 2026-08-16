@@ -84,14 +84,14 @@ export function OnboardingScreen() {
 
       if (parsed.currentAssets! > 0) {
         await addAsset({
-          name: 'Starting assets',
+          name: 'Tài sản ban đầu',
           category: 'other',
           value: parsed.currentAssets!,
         });
       }
       if (parsed.currentLiabilities! > 0) {
         await addLiability({
-          name: 'Starting liabilities',
+          name: 'Nợ ban đầu',
           category: 'other',
           value: parsed.currentLiabilities!,
         });
@@ -106,20 +106,20 @@ export function OnboardingScreen() {
   return (
     <Screen>
       <SectionHeader
-        title="Let's set up your plan"
-        subtitle="A few numbers, then you're in. You can change all of this later."
+        title="Thiết lập kế hoạch của bạn"
+        subtitle="Chỉ vài con số, sau đó bạn đã sẵn sàng. Bạn có thể sửa lại sau."
       />
 
       <Card style={styles.card}>
         <FormField
-          label="Current age"
+          label="Tuổi hiện tại"
           value={age}
           onChangeText={setAge}
           keyboardType="number-pad"
           placeholder="30"
         />
         <FormField
-          label="Monthly income"
+          label="Thu nhập hàng tháng"
           value={monthlyIncome}
           onChangeText={setMonthlyIncome}
           keyboardType="numeric"
@@ -127,7 +127,7 @@ export function OnboardingScreen() {
           suffix="VND"
         />
         <FormField
-          label="Monthly spending"
+          label="Chi tiêu hàng tháng"
           value={monthlySpending}
           onChangeText={setMonthlySpending}
           keyboardType="numeric"
@@ -135,7 +135,7 @@ export function OnboardingScreen() {
           suffix="VND"
         />
         <FormField
-          label="Current assets"
+          label="Tài sản hiện có"
           value={currentAssets}
           onChangeText={setCurrentAssets}
           keyboardType="numeric"
@@ -143,7 +143,7 @@ export function OnboardingScreen() {
           suffix="VND"
         />
         <FormField
-          label="Current liabilities"
+          label="Nợ hiện có"
           value={currentLiabilities}
           onChangeText={setCurrentLiabilities}
           keyboardType="numeric"
@@ -151,14 +151,14 @@ export function OnboardingScreen() {
           suffix="VND"
         />
         <FormField
-          label="Expected annual return"
+          label="Lợi nhuận đầu tư kỳ vọng/năm"
           value={expectedAnnualReturn}
           onChangeText={setExpectedAnnualReturn}
           keyboardType="numeric"
           suffix="%"
         />
         <FormField
-          label="Safe withdrawal rate"
+          label="Tỷ lệ rút an toàn (SWR)"
           value={safeWithdrawalRate}
           onChangeText={setSafeWithdrawalRate}
           keyboardType="numeric"
@@ -167,8 +167,8 @@ export function OnboardingScreen() {
       </Card>
 
       <View style={styles.footer}>
-        <Button label="Continue" onPress={handleContinue} disabled={!isValid} loading={saving} />
-        <Text style={styles.hint}>Currency is set to VND for now.</Text>
+        <Button label="Tiếp tục" onPress={handleContinue} disabled={!isValid} loading={saving} />
+        <Text style={styles.hint}>Đơn vị tiền tệ hiện đang là VND.</Text>
       </View>
     </Screen>
   );

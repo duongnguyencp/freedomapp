@@ -79,24 +79,24 @@ export function AssetsScreen() {
 
   return (
     <Screen>
-      <SectionHeader title="Assets & Liabilities" />
+      <SectionHeader title="Tài sản & Nợ" />
 
       <AnimatedEntrance index={0}>
         <Card style={styles.summaryCard}>
           <View style={styles.summaryRow}>
-            <SummaryItem label="Assets" value={formatCompactVND(totalAssets)} />
-            <SummaryItem label="Liabilities" value={formatCompactVND(totalLiabilities)} />
-            <SummaryItem label="Net worth" value={formatCompactVND(netWorth)} emphasize />
+            <SummaryItem label="Tài sản" value={formatCompactVND(totalAssets)} />
+            <SummaryItem label="Nợ" value={formatCompactVND(totalLiabilities)} />
+            <SummaryItem label="Tài sản ròng" value={formatCompactVND(netWorth)} emphasize />
           </View>
         </Card>
       </AnimatedEntrance>
 
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Assets</Text>
+          <Text style={styles.sectionTitle}>Tài sản</Text>
           {editing?.kind !== 'asset' ? (
             <Button
-              label="+ Add asset"
+              label="+ Thêm tài sản"
               variant="secondary"
               onPress={() => setEditing({ kind: 'asset', id: null })}
             />
@@ -123,7 +123,7 @@ export function AssetsScreen() {
         ) : (
           <Card>
             {assets.length === 0 ? (
-              <Text style={styles.empty}>No assets yet. Add your first one above.</Text>
+              <Text style={styles.empty}>Chưa có tài sản nào. Thêm cái đầu tiên ở trên.</Text>
             ) : (
               assets.map((asset) => (
                 <EntryListItem
@@ -141,10 +141,10 @@ export function AssetsScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Liabilities</Text>
+          <Text style={styles.sectionTitle}>Nợ</Text>
           {editing?.kind !== 'liability' ? (
             <Button
-              label="+ Add liability"
+              label="+ Thêm khoản nợ"
               variant="secondary"
               onPress={() => setEditing({ kind: 'liability', id: null })}
             />
@@ -171,7 +171,7 @@ export function AssetsScreen() {
         ) : (
           <Card>
             {liabilities.length === 0 ? (
-              <Text style={styles.empty}>No liabilities. Nice.</Text>
+              <Text style={styles.empty}>Không có khoản nợ nào. Tốt đấy.</Text>
             ) : (
               liabilities.map((liability) => (
                 <EntryListItem

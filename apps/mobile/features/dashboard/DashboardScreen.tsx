@@ -43,7 +43,7 @@ export function DashboardScreen() {
     <Screen>
       <AnimatedEntrance index={0}>
         <Card tinted>
-          <Text style={styles.label}>FINANCIAL FREEDOM</Text>
+          <Text style={styles.label}>TỰ DO TÀI CHÍNH</Text>
 
           <View style={styles.ringWrap}>
             <ProgressRing progress={fiProgress} size={176} strokeWidth={14}>
@@ -63,26 +63,28 @@ export function DashboardScreen() {
 
           <View style={styles.rowBetween}>
             <View>
-              <Text style={styles.caption}>You need</Text>
+              <Text style={styles.caption}>Bạn cần thêm</Text>
               <Text style={[styles.remaining, remaining > 0 && styles.remainingWarm]}>
-                {remaining > 0 ? `${formatCompactVND(remaining)} more` : "You're there 🎉"}
+                {remaining > 0 ? `${formatCompactVND(remaining)} nữa` : 'Bạn đã đạt được rồi 🎉'}
               </Text>
             </View>
             <View style={styles.alignEnd}>
-              <Text style={styles.caption}>Estimated FI</Text>
-              <Text style={styles.remaining}>{projectedFIDate ? projectedFIDate.year : 'N/A'}</Text>
+              <Text style={styles.caption}>Dự kiến đạt FI</Text>
+              <Text style={styles.remaining}>{projectedFIDate ? projectedFIDate.year : '—'}</Text>
             </View>
           </View>
 
           {!projectedFIDate ? (
-            <Text style={styles.warning}>FI date cannot be estimated with current assumptions.</Text>
+            <Text style={styles.warning}>
+              Không thể ước tính ngày đạt FI với giả định hiện tại.
+            </Text>
           ) : null}
         </Card>
       </AnimatedEntrance>
 
       <AnimatedEntrance index={1}>
         <Card>
-          <Text style={styles.label}>NET WORTH</Text>
+          <Text style={styles.label}>TÀI SẢN RÒNG</Text>
           <AnimatedNumber
             value={netWorth}
             formatValue={formatCompactVND}
@@ -94,10 +96,10 @@ export function DashboardScreen() {
       <AnimatedEntrance index={2}>
         <View style={styles.metricRow}>
           <Card style={styles.metricCard}>
-            <FinancialMetric label="Savings rate" value={formatPercent(savingsRate, 0)} />
+            <FinancialMetric label="Tỷ lệ tiết kiệm" value={formatPercent(savingsRate, 0)} />
           </Card>
           <Card style={styles.metricCard}>
-            <FinancialMetric label="Monthly investment" value={formatCompactVND(monthlyInvestment)} />
+            <FinancialMetric label="Đầu tư hàng tháng" value={formatCompactVND(monthlyInvestment)} />
           </Card>
         </View>
       </AnimatedEntrance>
@@ -105,7 +107,7 @@ export function DashboardScreen() {
       {showChart ? (
         <AnimatedEntrance index={3}>
           <Card>
-            <Text style={styles.progressTitle}>Your progress</Text>
+            <Text style={styles.progressTitle}>Tiến độ của bạn</Text>
             <MiniLineChart
               labels={netWorthHistory.map((point) => point.label)}
               values={netWorthHistory.map((point) => point.value)}
@@ -121,7 +123,7 @@ export function DashboardScreen() {
           <Pressable>
             {({ pressed }) => (
               <Card style={[styles.whatIfCard, pressed && styles.whatIfCardPressed]}>
-                <Text style={styles.whatIfLabel}>What if I invest more?</Text>
+                <Text style={styles.whatIfLabel}>Nếu đầu tư nhiều hơn?</Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
               </Card>
             )}

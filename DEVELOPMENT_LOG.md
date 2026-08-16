@@ -480,6 +480,52 @@ khi dùng thật, không còn phase nào được định nghĩa sẵn.
 
 ---
 
+## Fix: crash khi animation chạy (Reanimated gọi hàm JS-thread từ worklet)
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+`AnimatedNumber` gọi `formatValue()` (hàm JS thường, vd `toLocaleString`) **bên trong**
+`useAnimatedProps` — callback này chạy trên UI thread của Reanimated, không được phép gọi
+hàm JS-thread thường → crash ngay khi animation bắt đầu (đúng lúc dashboard load). Đã viết
+lại `AnimatedNumber` chạy hoàn toàn trên JS thread bằng `requestAnimationFrame` thay vì
+Reanimated worklet — vẫn đếm số mượt, không còn gọi hàm ngoài từ trong worklet.
+`ProgressRing`/`Button`/`AnimatedEntrance` không bị ảnh hưởng (không gọi hàm JS ngoài trong
+worklet của chúng).
+
+---
+
+## Localization: hiển thị tiếng Việt
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+### Quyết định
+App chỉ nhắm 1 ngôn ngữ (tiếng Việt) cho MVP — dịch trực tiếp toàn bộ text trong code,
+**không** thêm thư viện i18n (i18next...). Đúng tinh thần "MVP đơn giản": không cần chuyển
+đổi ngôn ngữ lúc chạy, không cần thêm layer trừu tượng cho việc chưa có nhu cầu.
+
+### Đã dịch
+- Toàn bộ label, tiêu đề, placeholder, thông báo rỗng/lỗi trên cả 5 màn hình (Onboarding,
+  Home, Assets, History, Settings) + What-if.
+- Tên 4 tab (`Trang chủ`, `Tài sản`, `Lịch sử`, `Cài đặt`) và tiêu đề header của route
+  `what-if`.
+- Danh mục asset/liability (`Tiền mặt`, `Ngân hàng`, `Vàng`, `Cổ phiếu`, `ETF`, `Tiền số`,
+  `Bất động sản`, `Khoản vay`, `Thẻ tín dụng`, `Vay thế chấp`, `Khác`).
+- Nhãn tháng trên biểu đồ: `Th1`…`Th12` thay vì `Jan`…`Dec`.
+- `services/format.ts`: định dạng số kiểu Việt Nam — dấu phẩy (`,`) làm dấu thập phân, dấu
+  chấm (`.`) phân cách hàng nghìn (`toLocaleString('vi-VN')`); viết tắt số tiền gọn dùng
+  `tỷ`/`triệu` thay vì `B`/`M` (vd `₫1,7 tỷ` thay vì `₫1.7B`).
+
+### Files chính
+Gần như toàn bộ `apps/mobile/features/**`, `apps/mobile/app/**/_layout.tsx`,
+`apps/mobile/services/{format,date}.ts`.
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công.
+- `financial-engine` vẫn 33/33 test pass (không đụng logic tính toán, chỉ đổi trình bày).
+- Demo thật: mở app — toàn bộ giao diện hiện tiếng Việt, số tiền hiện dạng `₫1,7 tỷ`.
+
+---
+
 ## Ghi chú chung
 
 - Mỗi phase khi hoàn thành: cập nhật bảng tiến độ ở đầu file, tick trạng thái ✅,

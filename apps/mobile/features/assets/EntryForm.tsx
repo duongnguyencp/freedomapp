@@ -53,10 +53,10 @@ export function EntryForm({
 
   return (
     <Card style={styles.card}>
-      <FormField label="Name" value={name} onChangeText={setName} placeholder="e.g. Vietcombank" />
+      <FormField label="Tên" value={name} onChangeText={setName} placeholder="vd: Vietcombank" />
       <CategoryChips categories={categories} selected={category} onSelect={setCategory} />
       <FormField
-        label="Value"
+        label="Giá trị"
         value={value}
         onChangeText={setValue}
         keyboardType="numeric"
@@ -66,14 +66,14 @@ export function EntryForm({
       <View style={styles.actions}>
         {onDelete ? (
           <View style={styles.actionFlex}>
-            <Button label="Delete" variant="danger" onPress={onDelete} />
+            <Button label="Xoá" variant="danger" onPress={onDelete} />
           </View>
         ) : null}
         <View style={styles.actionFlex}>
-          <Button label="Cancel" variant="secondary" onPress={onCancel} />
+          <Button label="Huỷ" variant="secondary" onPress={onCancel} />
         </View>
         <View style={styles.actionFlex}>
-          <Button label="Save" onPress={handleSave} disabled={!isValid} />
+          <Button label="Lưu" onPress={handleSave} disabled={!isValid} />
         </View>
       </View>
     </Card>

@@ -1,14 +1,14 @@
 import type { Asset, AssetCategory, LiabilityCategory } from 'financial-engine';
 
 export const ASSET_CATEGORIES: { value: AssetCategory; label: string }[] = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'bank', label: 'Bank' },
-  { value: 'gold', label: 'Gold' },
-  { value: 'stocks', label: 'Stocks' },
+  { value: 'cash', label: 'Tiền mặt' },
+  { value: 'bank', label: 'Ngân hàng' },
+  { value: 'gold', label: 'Vàng' },
+  { value: 'stocks', label: 'Cổ phiếu' },
   { value: 'etf', label: 'ETF' },
-  { value: 'crypto', label: 'Crypto' },
-  { value: 'real_estate', label: 'Real Estate' },
-  { value: 'other', label: 'Other' },
+  { value: 'crypto', label: 'Tiền số' },
+  { value: 'real_estate', label: 'Bất động sản' },
+  { value: 'other', label: 'Khác' },
 ];
 
 // Validated categorical palette (fixed order — never cycled or reassigned
@@ -56,10 +56,10 @@ export function buildAssetAllocation(assets: Asset[]): AllocationSlice[] {
 }
 
 export const LIABILITY_CATEGORIES: { value: LiabilityCategory; label: string }[] = [
-  { value: 'loan', label: 'Loan' },
-  { value: 'credit_card', label: 'Credit Card' },
-  { value: 'mortgage', label: 'Mortgage' },
-  { value: 'other', label: 'Other' },
+  { value: 'loan', label: 'Khoản vay' },
+  { value: 'credit_card', label: 'Thẻ tín dụng' },
+  { value: 'mortgage', label: 'Vay thế chấp' },
+  { value: 'other', label: 'Khác' },
 ];
 
 export function categoryLabel(

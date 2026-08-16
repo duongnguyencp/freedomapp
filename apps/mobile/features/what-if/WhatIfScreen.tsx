@@ -68,14 +68,16 @@ export function WhatIfScreen() {
 
   return (
     <Screen edges={[]}>
-      <Text style={styles.intro}>See how extra monthly investment changes your FI date.</Text>
+      <Text style={styles.intro}>
+        Xem việc đầu tư thêm mỗi tháng thay đổi ngày đạt FI của bạn thế nào.
+      </Text>
 
       <Card style={styles.card}>
-        <Text style={styles.label}>Current monthly investment</Text>
+        <Text style={styles.label}>Đầu tư hàng tháng hiện tại</Text>
         <Text style={styles.value}>{formatCompactVND(baseMonthlyInvestment)}</Text>
 
         <View style={styles.sliderHeader}>
-          <Text style={styles.label}>Add per month</Text>
+          <Text style={styles.label}>Thêm mỗi tháng</Text>
           <Text style={styles.sliderValue}>+{formatCompactVND(additionalInvestment)}</Text>
         </View>
         <Slider
@@ -96,7 +98,7 @@ export function WhatIfScreen() {
 
       <Card style={styles.card}>
         <FormField
-          label="Expected annual return"
+          label="Lợi nhuận đầu tư kỳ vọng/năm"
           value={returnInput}
           onChangeText={setReturnInput}
           keyboardType="numeric"
@@ -108,20 +110,20 @@ export function WhatIfScreen() {
       <Card style={styles.resultCard}>
         <View style={styles.resultRow}>
           <View>
-            <Text style={styles.label}>Current FI date</Text>
-            <Text style={styles.resultValue}>{currentDate ? currentDate.year : 'N/A'}</Text>
+            <Text style={styles.label}>Ngày đạt FI hiện tại</Text>
+            <Text style={styles.resultValue}>{currentDate ? currentDate.year : '—'}</Text>
           </View>
           <View style={styles.alignEnd}>
-            <Text style={styles.label}>New FI date</Text>
+            <Text style={styles.label}>Ngày đạt FI mới</Text>
             <Text style={[styles.resultValue, styles.resultValueAccent]}>
-              {newDate ? newDate.year : 'N/A'}
+              {newDate ? newDate.year : '—'}
             </Text>
           </View>
         </View>
 
         <View style={styles.divider} />
 
-        <Text style={styles.label}>Difference</Text>
+        <Text style={styles.label}>Chênh lệch</Text>
         <Text style={styles.difference}>{difference}</Text>
       </Card>
     </Screen>
@@ -136,14 +138,13 @@ function toNumber(value: string): number | null {
 
 function describeDifference(yearsSaved: number | null): string {
   if (yearsSaved === null) {
-    return 'N/A';
+    return '—';
   }
   const rounded = Math.round(Math.abs(yearsSaved));
   if (rounded === 0) {
-    return 'No change';
+    return 'Không đổi';
   }
-  const unit = rounded === 1 ? 'year' : 'years';
-  return yearsSaved > 0 ? `${rounded} ${unit} earlier` : `${rounded} ${unit} later`;
+  return yearsSaved > 0 ? `Sớm hơn ${rounded} năm` : `Muộn hơn ${rounded} năm`;
 }
 
 const styles = StyleSheet.create({

@@ -23,7 +23,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Trang chủ',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" color={color} size={size} />
           ),
@@ -32,7 +32,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="assets"
         options={{
-          title: 'Assets',
+          title: 'Tài sản',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="wallet-outline" color={color} size={size} />
           ),
@@ -41,7 +41,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: 'Lịch sử',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="trending-up-outline" color={color} size={size} />
           ),
@@ -50,7 +50,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'Cài đặt',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" color={color} size={size} />
           ),

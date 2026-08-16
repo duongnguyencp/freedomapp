@@ -13,7 +13,7 @@ export default function RootLayout() {
           name="what-if"
           options={{
             headerShown: true,
-            title: 'What if I invest more?',
+            title: 'Nếu đầu tư nhiều hơn?',
             headerStyle: { backgroundColor: colors.background },
             headerTintColor: colors.textPrimary,
             headerShadowVisible: false,
