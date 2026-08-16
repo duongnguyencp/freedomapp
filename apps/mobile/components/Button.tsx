@@ -32,7 +32,7 @@ export function Button({ label, variant = 'primary', loading, disabled, ...rest 
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'secondary' ? colors.accent : '#FFFFFF'} />
+        <ActivityIndicator color={variant === 'secondary' ? colors.ink : '#FFFFFF'} />
       ) : (
         <Text style={[styles.label, variant === 'secondary' && styles.labelSecondary]}>
           {label}
@@ -44,8 +44,8 @@ export function Button({ label, variant = 'primary', loading, disabled, ...rest 
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.sm,
-    paddingVertical: 14,
+    borderRadius: radius.pill,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -57,17 +57,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   labelSecondary: {
-    color: colors.accent,
+    color: colors.ink,
   },
 });
 
 const variantStyles = StyleSheet.create({
   primary: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.ink,
   },
   secondary: {
     backgroundColor: colors.accentSoft,

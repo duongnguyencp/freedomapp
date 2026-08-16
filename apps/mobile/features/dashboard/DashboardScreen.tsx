@@ -34,7 +34,7 @@ export function DashboardScreen() {
 
   return (
     <Screen>
-      <Card>
+      <Card tinted>
         <Text style={styles.label}>FINANCIAL FREEDOM</Text>
         <Text style={styles.progressValue}>{formatPercent(fiProgress)}</Text>
 
@@ -53,7 +53,7 @@ export function DashboardScreen() {
         <View style={styles.rowBetween}>
           <View>
             <Text style={styles.caption}>You need</Text>
-            <Text style={styles.remaining}>
+            <Text style={[styles.remaining, remaining > 0 && styles.remainingWarm]}>
               {remaining > 0 ? `${formatCompactVND(remaining)} more` : "You're there 🎉"}
             </Text>
           </View>
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(22, 21, 40, 0.1)',
     marginVertical: spacing.lg,
   },
   rowBetween: {
@@ -149,6 +149,9 @@ const styles = StyleSheet.create({
     ...typography.title,
     color: colors.textPrimary,
     marginTop: spacing.xs,
+  },
+  remainingWarm: {
+    color: colors.warm,
   },
   warning: {
     ...typography.caption,

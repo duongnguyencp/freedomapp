@@ -1,23 +1,35 @@
 // FreedomPath design system.
 // Premium, minimal, calm, modern, financial. Keep it small on purpose —
 // this is the single source of truth for colors, spacing and type.
+//
+// Palette direction references the Starpay Figma kit (uikitfree.com) for
+// its language — lavender-tinted surfaces, near-black ink for primary
+// actions, a violet + warm-orange accent pair, bold rounded type — adapted
+// to FreedomPath's calmer FI-tracker identity (no payment-app chrome,
+// no gradients/illustration).
 
 export const colors = {
-  background: '#F7F8FA',
+  background: '#F5F3FB',
   surface: '#FFFFFF',
-  border: '#E9EBEF',
+  surfaceTinted: '#EDE7FA', // hero-card wash, the "debit card" treatment
+  border: '#E7E2F3',
 
-  textPrimary: '#0B1220',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
+  textPrimary: '#161528',
+  textSecondary: '#6F6B85',
+  textMuted: '#A29DBD',
 
-  accent: '#0F62FE', // confident, calm blue — "financial" without being loud
-  accentSoft: '#E8F0FE',
+  ink: '#161528', // near-black navy — primary buttons, active nav
 
-  success: '#16A34A',
+  accent: '#7C5CFC', // violet — progress, primary highlights
+  accentSoft: '#EDE7FA',
+
+  warm: '#F2924D', // secondary accent — liabilities, spending-side metrics
+  warmSoft: '#FCEADB',
+
+  success: '#16A34A', // reserved semantic "good" — never a decorative series
   successSoft: '#E8F6ED',
 
-  track: '#EEF0F4',
+  track: '#DCD3F2', // deliberately a step darker than surfaceTinted so the progress bar reads on the hero card too
 } as const;
 
 export const spacing = {
@@ -30,14 +42,14 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 14,
-  lg: 20,
+  sm: 14,
+  md: 18,
+  lg: 24,
   pill: 999,
 } as const;
 
 export const typography = {
-  hero: { fontSize: 44, fontWeight: '700' as const, letterSpacing: -1 },
+  hero: { fontSize: 44, fontWeight: '800' as const, letterSpacing: -1 },
   title: { fontSize: 22, fontWeight: '700' as const, letterSpacing: -0.3 },
   label: { fontSize: 13, fontWeight: '600' as const, letterSpacing: 0.4 },
   body: { fontSize: 16, fontWeight: '400' as const },

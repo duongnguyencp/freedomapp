@@ -316,6 +316,53 @@ pnpm mobile
 
 ---
 
+## Design refresh — tham khảo Starpay Figma kit
+
+**Trạng thái:** ✅ Done — 2026-08-15
+
+### Nguồn tham khảo
+[Starpay Finance App UI Kit](https://uikitfree.com/starpay-free-figma-finance-app-ui-kit-template/)
+(uikitfree.com) — không truy cập được file Figma thật (cần đăng nhập), người dùng gửi
+screenshot 4 màn hình (Onboarding, Home, Statistic, Transfer) để tham khảo trực tiếp.
+
+### Đã lấy gì, bỏ gì
+Lấy **ngôn ngữ thị giác**, bỏ **toàn bộ tính năng thanh toán** (Transfer/Send Money, thẻ
+debit/credit) — không liên quan tới FreedomPath (đây không phải app ngân hàng/thanh toán,
+theo đúng nguyên tắc sản phẩm trong prompt.md mục 17).
+
+Đã áp dụng:
+- Nền tím lavender nhạt (`#F5F3FB`) thay vì xám trung tính.
+- Accent chính chuyển từ xanh dương → **tím** (`#7C5CFC`) cho progress ring/bar, chart net
+  worth, active tab.
+- Thêm accent phụ **cam ấm** (`#F2924D`) cho phần "You need X more" (khoảng cách còn lại) —
+  tạo cặp đôi tím/cam giống thẻ debit/credit trong bản gốc, nhưng dùng có chủ đích (semantic:
+  tím = tiến độ đã đạt, cam = phần còn thiếu), không phải trang trí ngẫu nhiên.
+- Nút chính (Button primary) chuyển sang **đen navy** (`#161528`, token `colors.ink`) dạng
+  pill bo tròn hoàn toàn — giống nút "Sign In" trong bản gốc.
+- Card hero (Financial Freedom trên Dashboard) có nền tím nhạt (`surfaceTinted`) — 1 khoảnh
+  khắc nhấn duy nhất mỗi màn hình, không lạm dụng.
+- Bo góc lớn hơn (`radius.lg` 20→24), số liệu hero đậm hơn (`fontWeight` 700→800).
+- **Không** copy màu categorical (asset allocation) — giữ nguyên palette 8-hue đã validate ở
+  Phase 5 vì đổi sẽ phá kiểm tra CVD/contrast đã chạy.
+- **Không** thêm hoạ tiết gradient xoáy trang trí trên card — giữ đúng nguyên tắc gốc "avoid
+  excessive gradients", chỉ dùng màu phẳng (flat tint).
+
+### Files chính
+```
+apps/mobile/constants/theme.ts                 (palette mới)
+apps/mobile/components/Card.tsx                 + tinted prop
+apps/mobile/components/Button.tsx               primary -> ink, pill radius
+apps/mobile/features/dashboard/DashboardScreen.tsx
+```
+
+### Cách verify / demo
+- `tsc --noEmit` sạch, `expo export --platform android` bundle thành công.
+- `financial-engine` vẫn 33/33 test pass (không đụng logic).
+- Demo thật: mở Home — card "Financial Freedom" có nền tím nhạt, progress bar tím, "You need
+  X more" màu cam; nút "Continue"/"Save"/"Record snapshot" giờ là pill đen.
+
+---
+
 ## Phase 6 — What-if calculator
 
 **Trạng thái:** ⬜ Not started
